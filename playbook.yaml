@@ -5,10 +5,12 @@
   pre_tasks:
 
   - name: update the repository cache
+    tags: always
     package:
       update_cache: yes
 
   - name: create ansible user
+    tags: always
     user:
       name: ansible
       groups: root
@@ -31,8 +33,10 @@
 ############################################################################
 
   - name: upgrade packages
+    tags: always
     apt:
       upgrade: dist
 
-#  - name: reboot clients
-#    reboot:
+  - name: reboot clients
+    tags: never 
+    reboot:
