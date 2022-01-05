@@ -1,2 +1,21 @@
+[ansible]
 localhost ansible_connection=local              #workstation
+
+[clients]
 192.168.1.141 		                        #machine for samba,nfs,apache2,webdav
+
+[ubuntu]
+192.168.1.141
+
+[apache server]
+192.168.1.141
+
+[website]
+192.168.1.141
+
+[file-servers]
+192.168.1.141
+
+[webdav]
+192.168.1.141
+
