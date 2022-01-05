@@ -1,1 +1,2 @@
-192.168.1.141		#machine for samba,nfs,apache2,webdav
+localhost ansible_connection=local              #workstation
+192.168.1.141 		                        #machine for samba,nfs,apache2,webdav
