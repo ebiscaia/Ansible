@@ -7,3 +7,9 @@
   - name: update the repository cache
     package:
       update_cache: yes
+
+  - name: create ansible user
+    user:
+      name: ansible
+      groups: root
+
