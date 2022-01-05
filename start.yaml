@@ -37,6 +37,10 @@
     apt:
       upgrade: dist
 
+- hosts: clients
+  become: true
+  tasks:
+
   - name: reboot clients
     tags: never 
     reboot:
