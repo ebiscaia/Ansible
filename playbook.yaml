@@ -5,5 +5,5 @@
   pre_tasks:
 
   - name: update the repository cache
-    apt:
+    package:
       update_cache: yes
