@@ -1,0 +1,9 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: update the repository cache
+    apt:
+      update_cache: yes
