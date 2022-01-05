@@ -28,4 +28,11 @@
       user: ansible
       key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWBKMr4lAZEzKiqXslcqDgmId5MCgQw3Pf2tNRWeNee ansible key
 
+############################################################################
 
+  - name: upgrade packages
+    apt:
+      upgrade: dist
+
+#  - name: reboot clients
+#    reboot:
