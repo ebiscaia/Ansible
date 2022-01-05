@@ -13,6 +13,7 @@
       name: ansible
       groups: root
 
+#############################################################################
 # This allows to connect to the clients without the need of the sudo password    
   - name: copy sudoer_ansible file to /etc/sudoers.d/ansible
     copy:
@@ -21,3 +22,10 @@
       owner: root
       group: root
       mode: 0440
+
+  - name: copy the SSH key ansible user
+    authorized_key:
+      user: ansible
+      key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWBKMr4lAZEzKiqXslcqDgmId5MCgQw3Pf2tNRWeNee ansible key
+
+
