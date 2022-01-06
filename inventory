@@ -1,19 +1,19 @@
 [ansible]
-localhost ansible_connection=local              #workstation
+localhost ansible_connection=local 'ansible_python_interpreter=/usr/bin/python3'		#workstation
 
 [clients]
-192.168.1.141 		                        #machine for samba,nfs,apache2,webdav
+192.168.1.141 'ansible_python_interpreter=/usr/bin/python3'					#machine for samba,nfs,apache2,webdav
 
 [ubuntu]
 192.168.1.141
 
-[apache server]
+[apache_server]
 192.168.1.141
 
 [website]
 192.168.1.141
 
-[file-servers]
+[file_servers]
 192.168.1.141
 
 [webdav]
