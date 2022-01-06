@@ -19,3 +19,13 @@
       name: [htop,neofetch,tree,zsh,ranger,unzip,git,vim-nox,speedtest-cli,wget,curl,tmux,rsync,locate,numlockx]
       state: present 
 
+- hosts: all
+  become: true
+  tasks:
+
+  - name: copy tmux configuration file
+    copy:
+      src: .tmux.conf
+      dest: /home/eddie/
+      owner: eddie
+      mode: 0664  
