@@ -30,6 +30,12 @@
       owner: eddie
       mode: 0664
 
+- hosts: all
+  remote_user: eddie
+  become_user: eddie
+  roles:
+    - ansible-ohmyzsh
+
 - hosts: file_servers
   become: true
   tasks:
