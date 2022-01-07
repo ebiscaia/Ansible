@@ -1,8 +1,8 @@
 ---
-- name: Installing Zsh and git
-  apt: pkg=zsh,git state=latest
-  register: installation
-  become: true
+#- name: Installing Zsh and git
+#  apt: pkg=zsh,git state=latest
+#  register: installation
+#  become: true
 
 - name: Check if .zshrc exists
   stat:
