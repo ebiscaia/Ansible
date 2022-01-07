@@ -36,6 +36,18 @@
   roles:
     - ansible-ohmyzsh
 
+- hosts: clients
+  remote_user: eddie
+  become_user: eddie
+  tasks:
+
+  - name: clone zsh auto-suggestion repo
+    git:
+      repo: https://github.com/zsh-users/zsh-autosuggestions.git
+      dest: /home/eddie/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+      version: master
+
+
 - hosts: file_servers
   become: true
   tasks:
