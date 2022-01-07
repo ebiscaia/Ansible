@@ -28,4 +28,13 @@
       src: .tmux.conf
       dest: /home/eddie/
       owner: eddie
-      mode: 0664  
+      mode: 0664
+
+- hosts: file_servers
+  become: true
+  tasks:
+
+    - name: install samba and nfs file server applications
+      package:
+        name: [samba,nfs-kernel-server,nfs-common]
+        state: latest
