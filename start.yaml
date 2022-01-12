@@ -14,6 +14,7 @@
     user:
       name: ansible
       groups: root
+      shell: /bin/bash
 
 #############################################################################
 # This allows to connect to the clients without the need of the sudo password    
