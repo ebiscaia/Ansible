@@ -31,30 +31,26 @@
       mode: 0664
 
 - hosts: all
-  remote_user: eddie
-  become_user: eddie
   roles:
     - ansible-ohmyzsh
 
-- hosts: all 
-  remote_user: eddie
-  become_user: eddie
+- hosts: all
   tasks:
 
   - name: clone zsh auto-suggestion repo
     git:
       repo: https://github.com/zsh-users/zsh-autosuggestions.git
-      dest: /home/eddie/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+      dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 
   - name: clone zsh syntax highlighting repo
     git:
       repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
-      dest: /home/eddie/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+      dest: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 
   - name: clone zsh typewritten theme
     git:
       repo: https://github.com/reobin/typewritten.git
-      dest: /home/eddie/.oh-my-zsh/custom/themes/typewritten
+      dest: ~/.oh-my-zsh/custom/themes/typewritten
 
 - hosts: file_servers
   become: true
