@@ -1,0 +1,93 @@
+---
+
+- hosts: [192.168.1.123,192.168.1.141]
+  tasks:
+
+  - name: remove comment from enable correction field
+    lineinfile:
+      path: ~/.zshrc
+      regexp: '^# ENABLE_CORRECTION="true"'
+      line: 'ENABLE_CORRECTION="true"'
+
+  - name: enable oh-my-zsh plugins
+    lineinfile:
+      path: ~/.zshrc
+      regexp: '^plugins='  
+      line: 'plugins=(git zsh-autosuggestions zsh-syntax-highlighting)'
+
+  - name: comment original theme
+    lineinfile:
+      path: ~/.zshrc
+      regexp: '^ZSH_THEME="robby'
+      line: '#ZSH_THEME="robbyrussel"'
+
+  - name: insert reobin/typenwritten theme
+    blockinfile:
+      path: ~/.zshrc
+      marker: "## {mark} TypenWritten theme ##" 
+      block: |
+        ZSH_THEME="typewritten/typewritten"
+        TYPEWRITTEN_PROMPT_LAYOUT="multiline"
+        TYPEWRITTEN_SYMBOL="->"
+        TYPEWRITTEN_RELATIVE_PATH="adaptive"
+        TYPEWRITTEN_CURSOR="block"
+      insertafter: '^#ZSH_THEME="robby'
+
+  - name: insert some aliases
+    blockinfile:
+      path: ~/.zshrc
+      marker: "## {mark} Aliases ##"
+      block: |
+        alias l='ls -CF'
+        alias la='ls -A'
+        alias ll='ls -alhF'
+        alias ls='ls --color=auto'
+      insertafter: "^# alias"
+
+  - name: insert aliases for apt
+    blockinfile:
+      path: ~/.zshrc
+      marker: "## {mark} Apt aliases ##"
+      block: |
+        alias aptu='sudo apt update; sudo apt upgrade -y; sudo apt autopurge -y'
+        alias apti='sudo apt update; sudo apt install'
+        alias aptd='sudo apt update; sudo apt autoremove -y'
+      insertafter: "^## END Aliases"
+
+
+
+- hosts: [192.168.1.123,192.168.1.141]
+  become: true
+  tasks:
+
+  - name: copy the .oh-my-zsh to user eddie
+    copy:
+      remote_src: yes
+      src: /home/ansible/.oh-my-zsh
+      dest: /home/eddie/
+      owner: eddie
+      group: eddie
+      mode: 0755
+
+
+  - name: copy the .zshrc file to user eddie
+    copy:
+      remote_src: yes
+      src: /home/ansible/.zshrc
+      dest: /home/eddie/
+      owner: eddie
+      group: eddie
+      mode: 0644
+
+
+
+      #- hosts: all
+      # become: true
+      #remote_user: ansible
+      #tasks:
+
+      #- name: make zsh the default shell for user eddie
+      #lineinfile:
+      #path: /etc/passwd
+      #regexp: '^eddie:x:'
+      #line: 'eddie:x:1000:1000:Eduardo Biscaia de Queiroz:/home/eddie:/bin/zsh' 
