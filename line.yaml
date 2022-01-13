@@ -1,6 +1,6 @@
 ---
 
-- hosts: [192.168.1.123,192.168.1.141]
+- hosts: [all]
   tasks:
 
   - name: remove comment from enable correction field
@@ -56,7 +56,7 @@
 
 
 
-- hosts: [192.168.1.123,192.168.1.141]
+- hosts: [singleuser]
   become: true
   tasks:
 
@@ -64,30 +64,76 @@
     copy:
       remote_src: yes
       src: /home/ansible/.oh-my-zsh
-      dest: /home/eddie/
+      dest: "/home/{{ item.name }}/"
       owner: eddie
       group: eddie
       mode: 0755
+    loop:
+      - { name: 'eddie' }
+
 
 
   - name: copy the .zshrc file to user eddie
     copy:
       remote_src: yes
       src: /home/ansible/.zshrc
-      dest: /home/eddie/
+      dest: "/home/{{ item.name }}/"
       owner: eddie
       group: eddie
       mode: 0644
+    loop:
+      - { name: 'eddie' }
+
+- hosts: [multiuser]
+  become: true
+  tasks:
+
+  - name: copy the .oh-my-zsh to user eddie
+    copy:
+      remote_src: yes
+      src: /home/ansible/.oh-my-zsh
+      dest: "/home/{{ item.name }}/"
+      owner: "{{ item.name }}"
+      group: "{{ item.name }}"
+      mode: 0755
+    loop:
+      - { name: 'kathy' }
+      - { name: 'eddie' }
 
 
+  - name: copy the .zshrc file to user eddie
+    copy:
+      remote_src: yes
+      src: /home/ansible/.zshrc
+      dest: "/home/{{ item.name }}/"
+      owner: "{{ item.name }}"
+      group: "{{ item.name }}"
+      mode: 0644
+    loop:
+      - { name: 'eddie' }
+      - { name: 'kathy' }
 
-      #- hosts: all
-      # become: true
-      #remote_user: ansible
-      #tasks:
+- hosts: [singleuser]
+  become: true
+  tasks:
 
-      #- name: make zsh the default shell for user eddie
-      #lineinfile:
-      #path: /etc/passwd
-      #regexp: '^eddie:x:'
-      #line: 'eddie:x:1000:1000:Eduardo Biscaia de Queiroz:/home/eddie:/bin/zsh' 
+  - name: make zsh the default shell for user eddie
+    user:
+      name: "{{ item.name }}"
+      shell: "{{ item.shell }}" 
+    loop: 
+      - { name: 'eddie', shell: '/usr/bin/zsh' }
+
+- hosts: [multiuser]
+  become: true
+  tasks:
+
+  - name: make zsh the default shell for users
+    user:
+      name: "{{ item.name }}"
+      shell: "{{ item.shell }}" 
+    loop:
+      - { name: 'eddie', shell: '/usr/bin/zsh' }
+      - { name: 'kathy', shell: '/bin/zsh' }
+
+
