@@ -26,11 +26,8 @@
 192.168.1.140
 
 [singleuser:vars]
-#- {name='eddie', shell='/bin/zsh'} 
 
 [multiuser]
 192.168.1.123
 
 [multiuser:vars]
-#name=[kathy,eddie]
-#shell=[/bin/bash,/usr/bin/zsh]
