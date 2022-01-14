@@ -52,6 +52,22 @@
       repo: https://github.com/reobin/typewritten.git
       dest: ~/.oh-my-zsh/custom/themes/typewritten
 
+- hosts: serverpi
+  become: true
+  tasks:
+
+    - name: create folder for file sharing
+      file:
+        path: '/mnt/{{ item }}'
+        state: directory
+        mode: '0777'
+        owner: nobody
+        group: nogroup
+      loop:
+        - Backup
+        - Music
+        - Photos
+
 - hosts: file_servers
   become: true
   tasks:
@@ -60,3 +76,4 @@
       package:
         name: [samba,nfs-kernel-server,nfs-common]
         state: latest
+
