@@ -71,8 +71,6 @@
     loop:
       - { name: 'eddie' }
 
-
-
   - name: copy the .zshrc file to user eddie
     copy:
       remote_src: yes
@@ -88,7 +86,7 @@
   become: true
   tasks:
 
-  - name: copy the .oh-my-zsh to user eddie
+  - name: copy the .oh-my-zsh to users
     copy:
       remote_src: yes
       src: /home/ansible/.oh-my-zsh
@@ -100,8 +98,7 @@
       - { name: 'kathy' }
       - { name: 'eddie' }
 
-
-  - name: copy the .zshrc file to user eddie
+  - name: copy the .zshrc file to users
     copy:
       remote_src: yes
       src: /home/ansible/.zshrc
