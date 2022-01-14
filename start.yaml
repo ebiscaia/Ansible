@@ -8,6 +8,7 @@
     tags: always
     package:
       update_cache: yes
+      cache_valid_time: 18000
 
   - name: create ansible user
     tags: always
