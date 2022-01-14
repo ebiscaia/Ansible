@@ -1,0 +1,8 @@
+---
+
+multiuser:
+  - name: kathy
+    shell: /bin/zsh
+  - name: eddie
+    shell: /usr/bin/zsh
+
