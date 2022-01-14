@@ -57,7 +57,7 @@
   become: true
   tasks:
 
-    - name: create folder for file sharing
+    - name: create folders for file sharing
       file:
         path: '/mnt/{{ item }}'
         state: directory
@@ -78,3 +78,14 @@
         name: [samba,nfs-kernel-server,nfs-common]
         state: latest
 
+
+- hosts: serverpi
+  become: true
+  tasks:
+
+    - name: add samba shares to smb.conf
+      blockinfile:
+        dest: /etc/samba/smb.conf
+        block: "{{ lookup('file', 'serverpi_samba') }}"
+        insertafter: "EOF"
+        backup: yes
