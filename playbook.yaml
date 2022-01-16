@@ -95,3 +95,9 @@
       loop:
         - { user: 'eddie', smbpass: 'serverpi' }
       register: smbuser
+
+    - name: restart samba service
+      service: 
+        name: smbd
+        state: restarted
+
