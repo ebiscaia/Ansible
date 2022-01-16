@@ -75,7 +75,7 @@
 
     - name: install samba and nfs file server applications
       package:
-        name: [samba,nfs-kernel-server,nfs-common]
+        name: [samba,nfs-kernel-server,nfs-common,cifs-utils]
         state: latest
 
 
