@@ -101,3 +101,16 @@
         name: smbd
         state: restarted
 
+    - name: add nfs exports to /etc/exports
+      blockinfile:
+        dest: /etc/exports
+        block: "{{ lookup('file', 'serverpi_nfs') }}"
+        insertafter: "EOF"
+        backup: yes
+      register: nfs_export
+
+    - name: restart nfs service
+      service:
+        name: nfs-kernel-server
+        state: restarted
+      when: nfs_export.changed
