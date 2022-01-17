@@ -17,7 +17,7 @@
   - name: install the basic packages
     tags: always
     package:
-      name: [htop,neofetch,tree,zsh,ranger,unzip,git,vim-nox,speedtest-cli,wget,curl,tmux,rsync,locate,numlockx]
+      name: [htop,neofetch,tree,zsh,ranger,unzip,git,vim-nox,speedtest-cli,python3-passlib,wget,curl,tmux,rsync,locate,numlockx]
       state: present 
 
 - hosts: all
@@ -155,3 +155,13 @@
       owner: root
       group: root
       mode: 0755
+
+  - name: Create a user to a file
+    community.general.htpasswd:
+      path: /mnt/Backup/.webdav/passwd.dav
+      name: eddie
+      password: serverpi
+      owner: root
+      group: www-data
+      mode: 0640 
+      state: present
