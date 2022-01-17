@@ -57,63 +57,63 @@
   become: true
   tasks:
 
-    - name: create folders for file sharing
-      file:
-        path: '/mnt/{{ item }}'
-        state: directory
-        mode: '0777'
-        owner: nobody
-        group: nogroup
-      loop:
-        - Backup
-        - Music
-        - Photos
+  - name: create folders for file sharing
+    file:
+      path: '/mnt/{{ item }}'
+      state: directory
+      mode: '0777'
+      owner: nobody
+      group: nogroup
+    loop:
+      - Backup
+      - Music
+      - Photos
 
 - hosts: file_servers
   become: true
   tasks:
 
-    - name: install samba and nfs file server applications
-      package:
-        name: [samba,nfs-kernel-server,nfs-common,cifs-utils]
-        state: latest
+  - name: install samba and nfs file server applications
+    package:
+      name: [samba,nfs-kernel-server,nfs-common,cifs-utils]
+      state: latest
 
 
 - hosts: serverpi
   become: true
   tasks:
 
-    - name: add samba shares to smb.conf
-      blockinfile:
-        dest: /etc/samba/smb.conf
-        block: "{{ lookup('file', 'serverpi_samba') }}"
-        insertafter: "EOF"
-        backup: yes
+  - name: add samba shares to smb.conf
+    blockinfile:
+      dest: /etc/samba/smb.conf
+      block: "{{ lookup('file', 'serverpi_samba') }}"
+      insertafter: "EOF"
+      backup: yes
 
-    - name: Create samba users
-      shell: "(echo {{ item.smbpass }}; echo {{ item.smbpass }}) | smbpasswd -s -a {{ item.user }}"
-      loop:
-        - { user: 'eddie', smbpass: 'serverpi' }
-      register: smbuser
+  - name: Create samba users
+    shell: "(echo {{ item.smbpass }}; echo {{ item.smbpass }}) | smbpasswd -s -a {{ item.user }}"
+    loop:
+      - { user: 'eddie', smbpass: 'serverpi' }
+    register: smbuser
 
-    - name: restart samba service
-      service: 
-        name: smbd
-        state: restarted
+  - name: restart samba service
+    service: 
+      name: smbd
+      state: restarted
 
-    - name: add nfs exports to /etc/exports
-      blockinfile:
-        dest: /etc/exports
-        block: "{{ lookup('file', 'serverpi_nfs') }}"
-        insertafter: "EOF"
-        backup: yes
-      register: nfs_export
+  - name: add nfs exports to /etc/exports
+    blockinfile:
+      dest: /etc/exports
+      block: "{{ lookup('file', 'serverpi_nfs') }}"
+      insertafter: "EOF"
+      backup: yes
+    register: nfs_export
 
-    - name: restart nfs service
-      service:
-        name: nfs-kernel-server
-        state: restarted
-      when: nfs_export.changed
+  - name: restart nfs service
+    service:
+      name: nfs-kernel-server
+      state: restarted
+    when: nfs_export.changed
 
 - hosts: [serverpi,192.168.1.140]
   become: true
@@ -121,5 +121,13 @@
 
   - name: install apache webserver
     apt:
-      name: [apache2-utils, apache2]
+      name: [apache2-utils,apache2]
       state: latest
+
+  - name: enable dav and dav_fs apache modules
+    community.general.apache2_module:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - dav_fs
+      - dav
