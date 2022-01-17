@@ -131,3 +131,12 @@
     loop:
       - dav_fs
       - dav
+
+  - name: create folder webdav
+    file:
+      path: /var/www/webdav
+      state: directory
+      owner: www-data
+      group: eddie
+      mode: 0755
+      
