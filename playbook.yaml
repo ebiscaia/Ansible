@@ -139,4 +139,11 @@
       owner: www-data
       group: eddie
       mode: 0755
-      
+     
+  - name: mount bind Backup folder to /var/www/webdav 
+    ansible.posix.mount:
+      path: /var/www/webdav
+      src: /mnt/Backup
+      opts: bind
+      state: mounted
+      fstype: none 
