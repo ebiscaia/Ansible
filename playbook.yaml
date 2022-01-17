@@ -147,3 +147,11 @@
       opts: bind
       state: mounted
       fstype: none 
+
+  - name : copy apache config file for webdav
+    copy:
+      src: webdav.conf
+      dest: /etc/apache2/sites-available
+      owner: root
+      group: root
+      mode: 0755
