@@ -165,3 +165,10 @@
       group: www-data
       mode: 0640 
       state: present
+    register: webdavuser
+
+  - name: restart apache2
+    service:
+      name: apache2
+      state: restarted
+    when: webdavuser.changed
