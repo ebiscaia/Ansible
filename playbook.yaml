@@ -78,14 +78,14 @@
       url: https://pkg.ltec.ch/public/conf/ltec-ag.gpg.key
       state: present
 
-  - name: Add specified repository into sources list
+  - name: Add repository to install wsdd
     apt_repository:
       repo: deb https://pkg.ltec.ch/public/ focal main  
       state: present
 
   - name: install samba and nfs file server applications
     package:
-      name: [samba,nfs-kernel-server,nfs-common,cifs-utils]
+      name: [samba,nfs-kernel-server,nfs-common,cifs-utils,wsdd]
       state: latest
 
 
