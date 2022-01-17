@@ -114,3 +114,12 @@
         name: nfs-kernel-server
         state: restarted
       when: nfs_export.changed
+
+- hosts: [serverpi,192.168.1.140]
+  become: true
+  tasks:
+
+  - name: install apache webserver
+    apt:
+      name: [apache2-utils, apache2]
+      state: latest
