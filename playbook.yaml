@@ -108,8 +108,12 @@
 
   - name: restart samba service
     service: 
-      name: smbd
+      name: "{{ item }}"
       state: restarted
+    loop:
+      - smbd
+      - wsdd
+    when: smbuser.changed    
 
   - name: add nfs exports to /etc/exports
     blockinfile:
