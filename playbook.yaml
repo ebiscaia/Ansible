@@ -247,3 +247,48 @@
       hour: "*/1"
       job: "ddclient -debug -verbose -noquiet -force"
 
+- hosts: another_lu
+  become: true
+  tasks:
+
+  - name: create folder /var/www/another_linux_user
+    tags: anu,website
+    file:
+      path: /var/www/another_linux_user     
+      state: directory
+      owner: www-data
+      group: www-data
+      mode: 0755
+
+  - name: mount bind folder in external drive with /var/www/another_linux_user
+    tags: anu,website
+    mount:
+      path: /var/www/another_linux_user
+      src: /mnt/Backup/Windows/another_linux_user
+      opts: bind
+      state: mounted
+      fstype: none
+
+  - name : copy apache config file for the website
+    tags: anu,website
+    copy:
+      src: another_linux_user
+      dest: /etc/apache2/sites-available/another_linux_user.conf
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: enable another_linux_user.conf
+    tags: anu,website
+    file:
+      src: /etc/apache2/sites-available/another_linux_user.conf
+      dest: /etc/apache2/sites-enabled/another_linux_user.conf
+      state: link
+    register: anu_enabled
+
+  - name: restart apache2
+    tags: anu,website
+    service:
+      name: apache2
+      state: restarted
+    when: anu_enabled.changed
