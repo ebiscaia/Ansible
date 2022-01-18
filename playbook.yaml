@@ -207,3 +207,14 @@
      apt:
        name: ddclient
        state: latest
+
+   - name: copy ddclient config file
+     tags: ddclient
+     copy:
+       src: ddclient
+       dest: /etc/ddclient.conf
+       owner: root
+       group: root
+       mode: 0600
+
+
