@@ -10,6 +10,24 @@
       update_cache: yes
       cache_valid_time: 18000
 
+  - name: upgrade packages
+    tags: always
+    apt:
+      upgrade: dist
+
+  - name: set timezone to Australia/Melbourne
+    timezone:
+      name: Australia/Melbourne
+    register: timezone
+
+  - name: restart crond after timezone changes
+    service:
+      name: cron
+      state: restarted
+    when: timezone.changed
+
+#############################################################################
+# This allows to connect to the clients without the need of the sudo password    
   - name: create ansible user
     tags: always
     user:
@@ -17,8 +35,6 @@
       groups: root
       shell: /bin/bash
 
-#############################################################################
-# This allows to connect to the clients without the need of the sudo password    
   - name: copy sudoer_ansible file to /etc/sudoers.d/ansible
     copy:
       src: sudoer_ansible
@@ -33,11 +49,6 @@
       key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWBKMr4lAZEzKiqXslcqDgmId5MCgQw3Pf2tNRWeNee ansible key
 
 ############################################################################
-
-  - name: upgrade packages
-    tags: always
-    apt:
-      upgrade: dist
 
 - hosts: clients
   become: true
