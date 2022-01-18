@@ -202,19 +202,48 @@
   become: true
   tasks:
 
-   - name: install ddclient
-     tags: ddclient
-     apt:
-       name: ddclient
-       state: latest
+  - name: install ddclient
+    tags: ddclient
+    apt:
+      name: ddclient
+      state: latest
 
-   - name: copy ddclient config file
-     tags: ddclient
-     copy:
-       src: ddclient
-       dest: /etc/ddclient.conf
-       owner: root
-       group: root
-       mode: 0600
+  - name: copy ddclient config file
+    tags: ddclient
+    copy:
+      src: ddclient
+      dest: /etc/ddclient.conf
+      owner: root
+      group: root
+      mode: 0600
+    register: ddclient_config
 
+  - name: restart ddclient
+    tags: ddclient
+    service:
+      name: ddclient
+      state: restarted
+    when: ddclient_config.changed
+  
+- hosts: ddclient
+  become: true
+  tasks:
+
+  - name: insert crontab job for ddclient
+    tags: ddclient
+    cron:
+      name: ddclient
+      minute: "*/5"
+      job: "ddclient -debug -verbose -noquiet"
+
+- hosts: ddclient_fallback
+  become: true
+  tasks:
+
+  - name: insert crontab job for ddclient_fallback
+    tags: ddclient_fallback
+    cron:
+      name: ddclient
+      hour: "*/1"
+      job: "ddclient -debug -verbose -noquiet -force"
 
