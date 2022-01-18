@@ -69,6 +69,19 @@
       - Music
       - Photos
 
+  - name: mount HD partitions to folders
+    mount:
+      path: '/mnt/{{ item.folder }}'
+      src: 'UUID={{ item.uuid }}'
+      fstype: auto
+      opts: nosuid,nodev,nofail,x-gvfs-show
+      state: mounted
+    loop:
+      - { folder: 'Backup', uuid: '05d1a142-de8d-4466-9ecc-aa7e8a8dd159' }
+      - { folder: 'Music', uuid: '70a57bc7-1e2b-455e-b74a-4058a47bfae4' }
+      - { folder: 'Photos', uuid: '2051dc1b-080d-4256-bb6e-e3b9f961766c' }  
+
+
 - hosts: file_servers
   become: true
   tasks:
