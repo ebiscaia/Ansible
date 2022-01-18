@@ -18,7 +18,7 @@
     tags: always
     package:
       name: [htop,neofetch,tree,zsh,ranger,unzip,git,vim-nox,speedtest-cli,python3-passlib,wget,curl,tmux,rsync,locate,numlockx]
-      state: present 
+      state: latest 
 
 - hosts: all
   become: true
@@ -197,3 +197,13 @@
       name: apache2
       state: restarted
     when: webdavuser.changed
+
+- hosts: [ddclient, ddclient_fallback]
+  become: true
+  tasks:
+
+   - name: install ddclient
+     tags: ddclient
+     apt:
+       name: ddclient
+       state: latest
