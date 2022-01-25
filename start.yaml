@@ -16,11 +16,13 @@
       upgrade: dist
 
   - name: set timezone to Australia/Melbourne
+    tags: always
     timezone:
       name: Australia/Melbourne
     register: timezone
 
   - name: restart crond after timezone changes
+    tags: always
     service:
       name: cron
       state: restarted
