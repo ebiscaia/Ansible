@@ -258,7 +258,7 @@
     cron:
       name: ddclient
       hour: "*/1"
-      job: "ddclient -debug -verbose -noquiet -force"
+      job: "sudo ddclient -debug -verbose -noquiet -force"
 
 - hosts: another_lu
   become: true
