@@ -28,10 +28,45 @@
       state: restarted
     when: timezone.changed
 
+############################################################################
+# Creates user eddie to clients and give him admin privileges and prompt
+# to change password if necessary and uploads user ssh key
+  - name: create eddie user
+    tags: firstrun
+    user:
+      name: eddie
+      password: '$1$zxzUnL3B$LGqg.T838RZWrTxjQ5ORf.'
+      update_password: on_create
+      create_home: yes
+      groups: users,sudo
+      append: yes
+    register: user_eddie
+
+  - name: make /bin/bash the default shell on creation
+    tags: firstrun
+    user:
+      name: eddie
+      shell: /bin/bash
+    when: user_eddie.changed
+
+  - name: copy sudoer_eddie file to /etc/sudoers.d/eddie
+    copy:
+      src: sudoer_eddie
+      dest: /etc/sudoers.d/eddie
+      owner: root
+      group: root
+      mode: 0440
+    when: user_eddie.changed
+
+  - name: copy SSH key eddie user
+    authorized_key:
+      user: eddie
+      key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHwLqywqLhqZ5Nj03X6LYppdAUofFDCv8mNS+cOns/E7 eddie main key      
+
 #############################################################################
 # This allows to connect to the clients without the need of the sudo password    
   - name: create ansible user
-    tags: always
+    tags: firstrun
     user:
       name: ansible
       groups: root
