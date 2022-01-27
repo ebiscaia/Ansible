@@ -1,6 +1,6 @@
 ---
 
-- hosts: [all]
+- hosts: all
   tasks:
 
   - name: remove comment from enable correction field
@@ -56,7 +56,7 @@
 
 
 
-- hosts: [singleuser]
+- hosts: singleuser
   become: true
   tasks:
 
@@ -82,7 +82,7 @@
     loop:
       - { name: 'eddie' }
 
-- hosts: [multiuser]
+- hosts: multiuser
   become: true
   tasks:
 
@@ -94,9 +94,9 @@
       owner: "{{ item.name }}"
       group: "{{ item.name }}"
       mode: 0755
-    loop:
-      - { name: 'kathy' }
-      - { name: 'eddie' }
+    loop: "{{ users }}"
+      #- { name: 'kathy' }
+      #- { name: 'eddie' }
 
   - name: copy the .zshrc file to users
     copy:

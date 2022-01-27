@@ -1,0 +1,5 @@
+---
+
+users:
+- { name: 'eddie', shell: '/usr/bin/zsh' }
+- { name: 'kathy', shell: '/bin/zsh' }
