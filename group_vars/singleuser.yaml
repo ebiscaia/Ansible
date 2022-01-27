@@ -1,0 +1,4 @@
+---
+
+users:
+- { name: 'eddie', shell: '/usr/bin/zsh' }
