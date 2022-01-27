@@ -13,6 +13,11 @@
 - hosts: all
   become: true
   tasks:
+
+  - name: upgrade packages
+    tags: always
+    apt:
+      upgrade: dist     
  
   - name: install the basic packages
     tags: always
@@ -58,16 +63,17 @@
   tasks:
 
   - name: create folders for file sharing
+    tags: firstrun
     file:
       path: '/mnt/{{ item }}'
       state: directory
       mode: '0777'
-      owner: nobody
-      group: nogroup
+      owner: '{{ item.owner }}'
+      group: '{{ item.group }}'
     loop:
-      - Backup
-      - Music
-      - Photos
+      - { folder: 'Backup', owner: 'www-data', group: 'eddie' }
+      - { folder: 'Music',  owner: 'nobody',   group: 'nogroup' }
+      - { folder: 'Photos', owner: 'nobody',   group: 'nogroup' }
 
   - name: mount HD partitions to folders
     mount:
@@ -77,9 +83,12 @@
       opts: nosuid,nodev,nofail,x-gvfs-show
       state: mounted
     loop:
-      - { folder: 'Backup', uuid: '05d1a142-de8d-4466-9ecc-aa7e8a8dd159' }
-      - { folder: 'Music', uuid: '70a57bc7-1e2b-455e-b74a-4058a47bfae4' }
-      - { folder: 'Photos', uuid: '2051dc1b-080d-4256-bb6e-e3b9f961766c' }  
+            #- { folder: 'Backup', uuid: '05d1a142-de8d-4466-9ecc-aa7e8a8dd159' }
+            #- { folder: 'Music', uuid: '70a57bc7-1e2b-455e-b74a-4058a47bfae4' }
+            #- { folder: 'Photos', uuid: '2051dc1b-080d-4256-bb6e-e3b9f961766c' }  
+      - { folder: 'Backup', uuid: '260b0f38-da2c-4892-858e-7b596208f5d6' }
+      - { folder: 'Music', uuid: 'BA10-1807' }
+      - { folder: 'Photos', uuid: '231e6aa0-285b-4f32-bf84-d45d5baf4626' }  
 
 
 - hosts: file_servers
@@ -161,11 +170,11 @@
 
   - name: create folder webdav
     file:
-      path: /var/www/webdav
+      path: '/var/www/webdav'
       state: directory
+      mode: '0755'
       owner: www-data
       group: eddie
-      mode: 0755
      
   - name: mount bind Backup folder to /var/www/webdav 
     ansible.posix.mount:
@@ -267,11 +276,14 @@
   - name: create folder /var/www/another_linux_user
     tags: anu,website
     file:
-      path: /var/www/another_linux_user     
+      path: "{{ item.folder }}/another_linux_user"
       state: directory
-      owner: www-data
-      group: www-data
+      owner: "{{ item.owner }}" 
+      group: "{{ item.group }}"
       mode: 0755
+    loop:
+      - {folder: '/mnt/Backup/Windows', owner: 'eddie',    group: 'eddie' }
+      - {folder: '/var/www',            owner: 'www-data', group: 'www-data' }
 
   - name: mount bind folder in external drive with /var/www/another_linux_user
     tags: anu,website
