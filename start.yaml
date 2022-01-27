@@ -29,40 +29,91 @@
     when: timezone.changed
 
 ############################################################################
-# Creates user eddie to clients and give him admin privileges and prompt
-# to change password if necessary and uploads user ssh key
+# Creates user eddie to single user clients and give him admin privileges
+# and creates the first password if necessary and uploads user ssh key
+
+- hosts: singleuser
+  become: true
+  tasks:
+
   - name: create eddie user
-    tags: firstrun
+    tags: firstrun,singleuser
     user:
-      name: eddie
-      password: '$1$zxzUnL3B$LGqg.T838RZWrTxjQ5ORf.'
+      name: "{{ item.name }}"
+      password: "{{ item.passwd }}"
       update_password: on_create
       create_home: yes
-      groups: users,sudo
+      groups: "{{ item.groups }}"
       append: yes
-    register: user_eddie
+    register: singleuser
+    loop: "{{ users }}"
 
   - name: make /bin/bash the default shell on creation
-    tags: firstrun
+    tags: firstrun,singleuser
     user:
-      name: eddie
+      name: "{{ item.name }}"
       shell: /bin/bash
-    when: user_eddie.changed
+    when: singleuser.changed
+    loop: "{{ users }}"
 
   - name: copy sudoer_eddie file to /etc/sudoers.d/eddie
+    tags: firstrun,singleuser
     copy:
       src: sudoer_eddie
       dest: /etc/sudoers.d/eddie
       owner: root
       group: root
       mode: 0440
-    when: user_eddie.changed
+    when: singleuser.changed
 
   - name: copy SSH key eddie user
+    tags: firstrun,singleuser
     authorized_key:
       user: eddie
       key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHwLqywqLhqZ5Nj03X6LYppdAUofFDCv8mNS+cOns/E7 eddie main key      
 
+# Creates user eddie to clients and give him admin privileges and prompt
+# to change password if necessary and uploads user ssh key
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: create eddie user
+    tags: firstrun,multiuser
+    user:
+      name: "{{ item.name }}"
+      password: "{{ item.passwd }}"
+      update_password: on_create
+      create_home: yes
+      groups: "{{ item.groups }}"
+      append: yes
+    register: multiuser
+    loop: "{{ users }}"
+
+  - name: make /bin/bash the default shell on creation
+    tags: firstrun,multiuser
+    user:
+      name: "{{ item.name }}"
+      shell: /bin/bash
+    when: multiuser.changed
+    loop: "{{ users }}"
+
+  - name: copy sudoer_eddie file to /etc/sudoers.d/eddie
+    tags: firstrun,multiuser
+    copy:
+      src: sudoer_eddie
+      dest: /etc/sudoers.d/eddie
+      owner: root
+      group: root
+      mode: 0440
+    when: multiuser.changed
+
+  - name: copy SSH key eddie user
+    tags: multiuser,firstrun
+    authorized_key:
+      user: eddie
+      key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHwLqywqLhqZ5Nj03X6LYppdAUofFDCv8mNS+cOns/E7 eddie main key      
 #############################################################################
 # This allows to connect to the clients without the need of the sudo password    
   - name: create ansible user
@@ -73,6 +124,7 @@
       shell: /bin/bash
 
   - name: copy sudoer_ansible file to /etc/sudoers.d/ansible
+    tags: firstrun
     copy:
       src: sudoer_ansible
       dest: /etc/sudoers.d/ansible
@@ -81,6 +133,7 @@
       mode: 0440
 
   - name: copy the SSH key ansible user
+    tags: firstrun
     authorized_key:
       user: ansible
       key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWBKMr4lAZEzKiqXslcqDgmId5MCgQw3Pf2tNRWeNee ansible key
