@@ -2,7 +2,7 @@
 192.168.1.140 'ansible_python_interpreter=/usr/bin/python3'
 
 [clients]
-192.168.1.101 'ansible_python_interpreter=/usr/bin/python3' 			                #machine for samba,nfs,apache2,webdav
+192.168.1.101 
 192.168.1.134
 
 [ubuntu]
@@ -10,19 +10,19 @@
 192.168.1.134
 
 [apache_server]
-192.168.1.134
+#192.168.1.134
 
 [another_lu]
-192.168.1.134
+#192.168.1.134
 
 [file_servers]
-192.168.1.134
+#192.168.1.134
 
 [webdav]
-192.168.1.134
+#192.168.1.134
 
 [serverpi]
-192.168.1.134
+#192.168.1.134
 
 [singleuser]
 192.168.1.101
@@ -38,5 +38,5 @@
 192.168.1.101
 
 [ddclient_fallback]
-192.168.1.134
-192.168.1.136
+#192.168.1.134
+#192.168.1.136
