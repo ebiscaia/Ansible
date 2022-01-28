@@ -1,0 +1,59 @@
+- name: enable dav and dav_fs apache modules
+  community.general.apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - dav_fs
+    - dav
+
+- name: create folder webdav
+  file:
+    path: '/var/www/webdav'
+    state: directory
+    mode: '0775'
+    owner: www-data
+    group: eddie
+
+- name: mount bind Backup folder to /var/www/webdav
+  ansible.posix.mount:
+    path: /var/www/webdav
+    src: /mnt/Backup
+    opts: bind
+    state: mounted
+    fstype: none
+
+- name : copy apache config file for webdav
+  copy:
+    src: webdav.conf
+    dest: /etc/apache2/sites-available
+    owner: root
+    group: root
+    mode: 0755
+
+- name: enable webdav.conf
+  file:
+    src: /etc/apache2/sites-available/webdav.conf
+    dest: /etc/apache2/sites-enabled/webdav.conf
+    state: link
+
+- name: disable default config
+  file:
+   path: /etc/apache2/sites-enabled/000-default.conf
+   state: absent
+
+- name: Create a user to a file
+  community.general.htpasswd:
+    path: /mnt/Backup/.webdav/passwd.dav
+    name: eddie
+    password: serverpi
+    owner: root
+    group: www-data
+    mode: 0640
+    state: present
+  register: webdavuser
+
+- name: restart apache2
+  service:
+    name: apache2
+    state: restarted
+  when: webdavuser.changed

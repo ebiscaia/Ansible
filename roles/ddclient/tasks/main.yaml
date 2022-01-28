@@ -1,0 +1,6 @@
+- name: insert crontab job for ddclient
+  tags: ddclient
+  cron:
+    name: ddclient
+    minute: "*/5"
+    job: "ddclient -debug -verbose -noquiet"

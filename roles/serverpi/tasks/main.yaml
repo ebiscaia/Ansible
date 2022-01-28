@@ -1,0 +1,63 @@
+- name: create folders for file sharing
+  tags: firstrun
+  file:
+    path: '/mnt/{{ item }}'
+    state: directory
+    mode: '0777'
+    owner: '{{ item.owner }}'
+    group: '{{ item.group }}'
+  loop:
+  - { folder: 'Backup', owner: 'www-data', group: 'eddie' }
+  - { folder: 'Music',  owner: 'nobody',   group: 'nogroup' }
+  - { folder: 'Photos', owner: 'nobody',   group: 'nogroup' }
+
+- name: mount HD partitions to folders
+  mount:
+    path: '/mnt/{{ item.folder }}'
+    src: 'UUID={{ item.uuid }}'
+    fstype: auto
+    opts: nosuid,nodev,nofail,x-gvfs-show
+    state: mounted
+  loop:
+  #- { folder: 'Backup', uuid: '05d1a142-de8d-4466-9ecc-aa7e8a8dd159' }
+  #- { folder: 'Music', uuid: '70a57bc7-1e2b-455e-b74a-4058a47bfae4' }
+  #- { folder: 'Photos', uuid: '2051dc1b-080d-4256-bb6e-e3b9f961766c' }
+  - { folder: 'Backup', uuid: '260b0f38-da2c-4892-858e-7b596208f5d6' }
+  - { folder: 'Music', uuid: 'BA10-1807' }
+  - { folder: 'Photos', uuid: '231e6aa0-285b-4f32-bf84-d45d5baf4626' }
+                                                                                                                                                            
+- name: add samba shares to smb.conf
+  blockinfile:
+    dest: /etc/samba/smb.conf
+    block: "{{ lookup('file', 'serverpi_samba') }}"
+    insertafter: "EOF"
+    backup: yes
+
+- name: Create samba users
+  shell: "(echo {{ item.smbpass }}; echo {{ item.smbpass }}) | smbpasswd -s -a {{ item.user }}"
+  loop:
+  - { user: 'eddie', smbpass: 'serverpi' }
+  register: smbuser
+
+- name: restart samba service
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+  - smbd
+  - wsdd
+  when: smbuser.changed
+
+- name: add nfs exports to /etc/exports
+  blockinfile:
+    dest: /etc/exports
+    block: "{{ lookup('file', 'serverpi_nfs') }}"
+    insertafter: "EOF"
+    backup: yes
+  register: nfs_export
+
+- name: restart nfs service
+  service:
+    name: nfs-kernel-server
+    state: restarted
+  when: nfs_export.changed

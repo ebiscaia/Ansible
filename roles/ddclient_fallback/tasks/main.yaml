@@ -1,0 +1,6 @@
+- name: insert crontab job for ddclient_fallback
+  tags: ddclient_fallback
+  cron:
+    name: ddclient
+    hour: "*/1"
+    job: "sudo ddclient -debug -verbose -noquiet -force"

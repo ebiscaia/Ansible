@@ -1,0 +1,49 @@
+- name: clone anotherlinuxuser repo
+  git:
+    repo: https://github.com/ebiscaia/another_linux_user.git
+    dest: /mnt/Backup/Windows/another_linux_user
+
+- name: create folders for the website
+  tags: anu,website
+  file:
+    path: "{{ item.folder }}/another_linux_user"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: 0755
+  loop:
+    - {folder: '/mnt/Backup/Windows', owner: 'eddie',    group: 'eddie' }
+    - {folder: '/var/www',            owner: 'www-data', group: 'www-data' }
+
+- name: mount bind folder in external drive with /var/www/another_linux_user
+  tags: anu,website
+  mount:
+    path: /var/www/another_linux_user
+    src: /mnt/Backup/Windows/another_linux_user
+    opts: bind
+    state: mounted
+    fstype: none
+
+- name : copy apache config file for the website
+  tags: anu,website
+  copy:
+    src: another_linux_user
+    dest: /etc/apache2/sites-available/another_linux_user.conf
+    owner: root
+    group: root
+    mode: 0755
+
+- name: enable another_linux_user.conf
+  tags: anu,website
+  file:
+    src: /etc/apache2/sites-available/another_linux_user.conf
+    dest: /etc/apache2/sites-enabled/another_linux_user.conf
+    state: link
+  register: anu_enabled
+
+- name: restart apache2
+  tags: anu,website
+  service:
+    name: apache2
+    state: restarted
+  when: anu_enabled.changed

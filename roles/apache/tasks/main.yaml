@@ -1,0 +1,4 @@
+- name: install apache webserver
+  apt:
+    name: [apache2-utils,apache2]
+    state: latest
