@@ -1,0 +1,94 @@
+- name: create eddie user
+  tags: firstrun,singleuser
+  user:
+    name: "{{ item.name }}"
+    password: "{{ item.passwd }}"
+    update_password: on_create
+    create_home: yes
+    groups: "{{ item.groups }}"
+    append: yes
+  register: singleuser
+  loop: "{{ users }}"
+
+- name: make /bin/bash the default shell on creation
+  tags: firstrun,singleuser
+  user:
+    name: "{{ item.name }}"
+    shell: /bin/bash
+  when: singleuser.changed
+  loop: "{{ users }}"
+
+- name: copy sudoer_eddie file to /etc/sudoers.d/eddie
+  tags: firstrun,singleuser
+  copy:
+    src: sudoer_eddie
+    dest: /etc/sudoers.d/eddie
+    owner: root
+    group: root
+    mode: 0440
+  when: singleuser.changed
+
+- name: copy SSH key eddie user
+  tags: firstrun,singleuser
+  authorized_key:
+    user: eddie
+    key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHwLqywqLhqZ5Nj03X6LYppdAUofFDCv8mNS+cOns/E7 eddie main key      
+
+- name: create eddie user
+  tags: firstrun,multiuser
+  user:
+    name: "{{ item.name }}"
+    password: "{{ item.passwd }}"
+    update_password: on_create
+    create_home: yes
+    groups: "{{ item.groups }}"
+    append: yes
+  register: multiuser
+  loop: "{{ users }}"
+
+- name: make /bin/bash the default shell on creation
+  tags: firstrun,multiuser
+  user:
+    name: "{{ item.name }}"
+    shell: /bin/bash
+  when: multiuser.changed
+  loop: "{{ users }}"
+
+- name: copy sudoer_eddie file to /etc/sudoers.d/eddie
+  tags: firstrun,multiuser
+  copy:
+    src: sudoer_eddie
+    dest: /etc/sudoers.d/eddie
+    owner: root
+    group: root
+    mode: 0440
+  when: multiuser.changed
+
+- name: copy SSH key eddie user
+  tags: multiuser,firstrun
+  authorized_key:
+    user: eddie
+    key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHwLqywqLhqZ5Nj03X6LYppdAUofFDCv8mNS+cOns/E7 eddie main key      
+
+- name: create ansible user
+  tags: firstrun
+  user:
+    name: ansible
+    groups: root
+    shell: /bin/bash
+
+- name: copy sudoer_ansible file to /etc/sudoers.d/ansible
+  tags: firstrun
+  copy:
+    src: sudoer_ansible
+    dest: /etc/sudoers.d/ansible
+    owner: root
+    group: root
+    mode: 0440
+
+- name: copy the SSH key ansible user
+  tags: firstrun
+  authorized_key:
+    user: ansible
+    key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWBKMr4lAZEzKiqXslcqDgmId5MCgQw3Pf2tNRWeNee ansible key
+

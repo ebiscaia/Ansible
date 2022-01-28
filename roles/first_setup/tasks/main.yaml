@@ -1,0 +1,18 @@
+- name: update the repository cache
+  tags: always
+  package:
+    update_cache: yes
+    cache_valid_time: 18000
+
+- name: set timezone to Australia/Melbourne
+  tags: always
+  timezone:
+    name: Australia/Melbourne
+  register: timezone
+
+- name: restart crond after timezone changes
+  tags: always
+  service:
+    name: cron
+    state: restarted
+  when: timezone.changed
