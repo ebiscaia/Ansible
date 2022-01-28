@@ -1,0 +1,8 @@
+Hi,
+
+Both encrypted and non-encrypted files are the same apart from the encryption.
+They were created with the sole purpose of testing Ansible vault capabilities
+so you do not need to worry about trying to break the encryption of the 
+encrypted file.
+
+Eduardo Biscaia de Queiroz
