@@ -1,4 +1,0 @@
-/mnt/Backup            192.168.1.0/24(rw,nohide,insecure,no_subtree_check,async)
-/mnt/Photos            192.168.1.0/24(rw,nohide,insecure,no_subtree_check,async)
-/mnt/Music             192.168.1.0/24(rw,nohide,insecure,no_subtree_check,async)
-
