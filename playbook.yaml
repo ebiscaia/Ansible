@@ -56,3 +56,19 @@
   become: true
   roles:
     - ddclient_fallback
+
+- hosts: multiuser
+  become: true
+  gather_facts: no
+  tasks:
+
+    - name: copy files to test ansible-vault
+      tags: vault
+      copy:
+        src: "~/Ansible/{{ item }}"
+        dest: /home/eddie/vault_files/
+        owner: eddie
+        mode: 0775
+      loop:
+        - non_encrypted.txt
+        - encrypted.txt
