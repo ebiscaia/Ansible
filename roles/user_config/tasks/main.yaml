@@ -1,0 +1,8 @@
+- name: copy tmux configuration file
+  tags: always
+  copy:
+    src: tmux.conf
+    dest: "/home/{{ item.name }}/.tmux.conf"
+    owner: "{{ item.name }}"
+    mode: 0664
+  loop: "{{ users }}"
