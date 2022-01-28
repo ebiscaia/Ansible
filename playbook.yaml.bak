@@ -1,0 +1,324 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: update repository cache
+    tags: always
+    package:
+      update_cache: yes
+      cache_valid_time: 18000
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: upgrade packages
+    tags: always
+    apt:
+      upgrade: dist     
+ 
+  - name: install the basic packages
+    tags: always
+    package:
+      name: [htop,neofetch,tree,zsh,ranger,unzip,git,vim-nox,speedtest-cli,python3-passlib,wget,curl,tmux,rsync,locate,numlockx]
+      state: latest 
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: copy tmux configuration file
+    copy:
+      src: .tmux.conf
+      dest: /home/eddie/
+      owner: eddie
+      mode: 0664
+
+- hosts: all
+  roles:
+    - ansible-ohmyzsh
+
+- hosts: all
+  tasks:
+
+  - name: clone zsh auto-suggestion repo
+    git:
+      repo: https://github.com/zsh-users/zsh-autosuggestions.git
+      dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+
+  - name: clone zsh syntax highlighting repo
+    git:
+      repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+      dest: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+
+  - name: clone zsh typewritten theme
+    git:
+      repo: https://github.com/reobin/typewritten.git
+      dest: ~/.oh-my-zsh/custom/themes/typewritten
+
+- hosts: serverpi
+  become: true
+  tasks:
+
+  - name: create folders for file sharing
+    tags: firstrun
+    file:
+      path: '/mnt/{{ item }}'
+      state: directory
+      mode: '0777'
+      owner: '{{ item.owner }}'
+      group: '{{ item.group }}'
+    loop:
+      - { folder: 'Backup', owner: 'www-data', group: 'eddie' }
+      - { folder: 'Music',  owner: 'nobody',   group: 'nogroup' }
+      - { folder: 'Photos', owner: 'nobody',   group: 'nogroup' }
+
+  - name: mount HD partitions to folders
+    mount:
+      path: '/mnt/{{ item.folder }}'
+      src: 'UUID={{ item.uuid }}'
+      fstype: auto
+      opts: nosuid,nodev,nofail,x-gvfs-show
+      state: mounted
+    loop:
+            #- { folder: 'Backup', uuid: '05d1a142-de8d-4466-9ecc-aa7e8a8dd159' }
+            #- { folder: 'Music', uuid: '70a57bc7-1e2b-455e-b74a-4058a47bfae4' }
+            #- { folder: 'Photos', uuid: '2051dc1b-080d-4256-bb6e-e3b9f961766c' }  
+      - { folder: 'Backup', uuid: '260b0f38-da2c-4892-858e-7b596208f5d6' }
+      - { folder: 'Music', uuid: 'BA10-1807' }
+      - { folder: 'Photos', uuid: '231e6aa0-285b-4f32-bf84-d45d5baf4626' }  
+
+
+- hosts: file_servers
+  become: true
+  tasks:
+
+  - name: add apt key for wsdd (make samba shares visible on Windows)
+    apt_key:
+      url: https://pkg.ltec.ch/public/conf/ltec-ag.gpg.key
+      state: present
+
+  - name: Add repository to install wsdd
+    apt_repository:
+      repo: deb https://pkg.ltec.ch/public/ focal main  
+      state: present
+
+  - name: install samba and nfs file server applications
+    package:
+      name: [samba,nfs-kernel-server,nfs-common,cifs-utils,wsdd]
+      state: latest
+
+
+- hosts: serverpi
+  become: true
+  tasks:
+
+  - name: add samba shares to smb.conf
+    blockinfile:
+      dest: /etc/samba/smb.conf
+      block: "{{ lookup('file', 'serverpi_samba') }}"
+      insertafter: "EOF"
+      backup: yes
+
+  - name: Create samba users
+    shell: "(echo {{ item.smbpass }}; echo {{ item.smbpass }}) | smbpasswd -s -a {{ item.user }}"
+    loop:
+      - { user: 'eddie', smbpass: 'serverpi' }
+    register: smbuser
+
+  - name: restart samba service
+    service: 
+      name: "{{ item }}"
+      state: restarted
+    loop:
+      - smbd
+      - wsdd
+    when: smbuser.changed    
+
+  - name: add nfs exports to /etc/exports
+    blockinfile:
+      dest: /etc/exports
+      block: "{{ lookup('file', 'serverpi_nfs') }}"
+      insertafter: "EOF"
+      backup: yes
+    register: nfs_export
+
+  - name: restart nfs service
+    service:
+      name: nfs-kernel-server
+      state: restarted
+    when: nfs_export.changed
+
+- hosts: [serverpi,192.168.1.140]
+  become: true
+  tasks:
+
+  - name: install apache webserver
+    apt:
+      name: [apache2-utils,apache2]
+      state: latest
+
+  - name: enable dav and dav_fs apache modules
+    community.general.apache2_module:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - dav_fs
+      - dav
+
+  - name: create folder webdav
+    file:
+      path: '/var/www/webdav'
+      state: directory
+      mode: '0775'
+      owner: www-data
+      group: eddie
+     
+  - name: mount bind Backup folder to /var/www/webdav 
+    ansible.posix.mount:
+      path: /var/www/webdav
+      src: /mnt/Backup
+      opts: bind
+      state: mounted
+      fstype: none 
+
+  - name : copy apache config file for webdav
+    copy:
+      src: webdav.conf
+      dest: /etc/apache2/sites-available
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: enable webdav.conf
+    file:
+      src: /etc/apache2/sites-available/webdav.conf
+      dest: /etc/apache2/sites-enabled/webdav.conf
+      state: link
+
+  - name: disable default config
+    file:
+     path: /etc/apache2/sites-enabled/000-default.conf
+     state: absent
+
+  - name: Create a user to a file
+    community.general.htpasswd:
+      path: /mnt/Backup/.webdav/passwd.dav
+      name: eddie
+      password: serverpi
+      owner: root
+      group: www-data
+      mode: 0640 
+      state: present
+    register: webdavuser
+
+  - name: restart apache2
+    service:
+      name: apache2
+      state: restarted
+    when: webdavuser.changed
+
+- hosts: [ddclient, ddclient_fallback]
+  become: true
+  tasks:
+
+  - name: install ddclient
+    tags: ddclient
+    apt:
+      name: ddclient
+      state: latest
+
+  - name: copy ddclient config file
+    tags: ddclient
+    copy:
+      src: ddclient
+      dest: /etc/ddclient.conf
+      owner: root
+      group: root
+      mode: 0600
+    register: ddclient_config
+
+  - name: restart ddclient
+    tags: ddclient
+    service:
+      name: ddclient
+      state: restarted
+    when: ddclient_config.changed
+  
+- hosts: ddclient
+  become: true
+  tasks:
+
+  - name: insert crontab job for ddclient
+    tags: ddclient
+    cron:
+      name: ddclient
+      minute: "*/5"
+      job: "ddclient -debug -verbose -noquiet"
+
+- hosts: ddclient_fallback
+  become: true
+  tasks:
+
+  - name: insert crontab job for ddclient_fallback
+    tags: ddclient_fallback
+    cron:
+      name: ddclient
+      hour: "*/1"
+      job: "sudo ddclient -debug -verbose -noquiet -force"
+
+- hosts: another_lu
+  become: true
+  tasks:
+
+  - name: clone anotherlinuxuser repo
+    git:
+      repo: https://github.com/ebiscaia/another_linux_user.git
+      dest: /mnt/Backup/Windows/another_linux_user
+
+  - name: create folder /var/www/another_linux_user
+    tags: anu,website
+    file:
+      path: "{{ item.folder }}/another_linux_user"
+      state: directory
+      owner: "{{ item.owner }}" 
+      group: "{{ item.group }}"
+      mode: 0755
+    loop:
+      - {folder: '/mnt/Backup/Windows', owner: 'eddie',    group: 'eddie' }
+      - {folder: '/var/www',            owner: 'www-data', group: 'www-data' }
+
+  - name: mount bind folder in external drive with /var/www/another_linux_user
+    tags: anu,website
+    mount:
+      path: /var/www/another_linux_user
+      src: /mnt/Backup/Windows/another_linux_user
+      opts: bind
+      state: mounted
+      fstype: none
+
+  - name : copy apache config file for the website
+    tags: anu,website
+    copy:
+      src: another_linux_user
+      dest: /etc/apache2/sites-available/another_linux_user.conf
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: enable another_linux_user.conf
+    tags: anu,website
+    file:
+      src: /etc/apache2/sites-available/another_linux_user.conf
+      dest: /etc/apache2/sites-enabled/another_linux_user.conf
+      state: link
+    register: anu_enabled
+
+  - name: restart apache2
+    tags: anu,website
+    service:
+      name: apache2
+      state: restarted
+    when: anu_enabled.changed

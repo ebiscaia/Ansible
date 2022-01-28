@@ -1,0 +1,136 @@
+---
+
+- hosts: all
+  tasks:
+
+  - name: remove comment from enable correction field
+    lineinfile:
+      path: ~/.zshrc
+      regexp: '^# ENABLE_CORRECTION="true"'
+      line: 'ENABLE_CORRECTION="true"'
+
+  - name: enable oh-my-zsh plugins
+    lineinfile:
+      path: ~/.zshrc
+      regexp: '^plugins='  
+      line: 'plugins=(git zsh-autosuggestions zsh-syntax-highlighting)'
+
+  - name: comment original theme
+    lineinfile:
+      path: ~/.zshrc
+      regexp: '^ZSH_THEME="robby'
+      line: '#ZSH_THEME="robbyrussel"'
+
+  - name: insert reobin/typenwritten theme
+    blockinfile:
+      path: ~/.zshrc
+      marker: "## {mark} TypenWritten theme ##" 
+      block: |
+        ZSH_THEME="typewritten/typewritten"
+        TYPEWRITTEN_PROMPT_LAYOUT="multiline"
+        TYPEWRITTEN_SYMBOL="->"
+        TYPEWRITTEN_RELATIVE_PATH="adaptive"
+        TYPEWRITTEN_CURSOR="block"
+      insertafter: '^#ZSH_THEME="robby'
+
+  - name: insert some aliases
+    blockinfile:
+      path: ~/.zshrc
+      marker: "## {mark} Aliases ##"
+      block: |
+        alias l='ls -CF'
+        alias la='ls -A'
+        alias ll='ls -alhF'
+        alias ls='ls --color=auto'
+      insertafter: "^# alias"
+
+  - name: insert aliases for apt
+    blockinfile:
+      path: ~/.zshrc
+      marker: "## {mark} Apt aliases ##"
+      block: |
+        alias aptu='sudo apt update; sudo apt upgrade -y; sudo apt autopurge -y'
+        alias apti='sudo apt update; sudo apt install'
+        alias aptd='sudo apt update; sudo apt autoremove -y'
+      insertafter: "^## END Aliases"
+
+
+
+- hosts: singleuser
+  become: true
+  tasks:
+
+  - name: copy the .oh-my-zsh to user eddie
+    copy:
+      remote_src: yes
+      src: /home/ansible/.oh-my-zsh
+      dest: "/home/{{ item.name }}/"
+      owner: eddie
+      group: eddie
+      mode: 0755
+    loop:
+      - { name: 'eddie' }
+
+  - name: copy the .zshrc file to user eddie
+    copy:
+      remote_src: yes
+      src: /home/ansible/.zshrc
+      dest: "/home/{{ item.name }}/"
+      owner: eddie
+      group: eddie
+      mode: 0644
+    loop:
+      - { name: 'eddie' }
+
+- hosts: multiuser
+  become: true
+  tasks:
+
+  - name: copy the .oh-my-zsh to users
+    copy:
+      remote_src: yes
+      src: /home/ansible/.oh-my-zsh
+      dest: "/home/{{ item.name }}/"
+      owner: "{{ item.name }}"
+      group: "{{ item.name }}"
+      mode: 0755
+    loop: "{{ users }}"
+      #- { name: 'kathy' }
+      #- { name: 'eddie' }
+
+  - name: copy the .zshrc file to users
+    copy:
+      remote_src: yes
+      src: /home/ansible/.zshrc
+      dest: "/home/{{ item.name }}/"
+      owner: "{{ item.name }}"
+      group: "{{ item.name }}"
+      mode: 0644
+    loop:
+      - { name: 'eddie' }
+      - { name: 'kathy' }
+
+- hosts: [singleuser]
+  become: true
+  tasks:
+
+  - name: make zsh the default shell for user eddie
+    user:
+      name: "{{ item.name }}"
+      shell: "{{ item.shell }}" 
+    loop: 
+      - { name: 'eddie', shell: '/usr/bin/zsh' }
+
+- hosts: [multiuser]
+  become: true
+  tasks:
+
+  - name: make zsh the default shell for users
+    user:
+      name: "{{ item.name }}"
+      shell: "{{ item.shell }}" 
+    loop:
+      - { name: 'eddie', shell: '/usr/bin/zsh' }
+      - { name: 'kathy', shell: '/bin/zsh' }
+
+
