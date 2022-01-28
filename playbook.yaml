@@ -2,61 +2,19 @@
 
 - hosts: all
   become: true
-  pre_tasks:
-
-  - name: update repository cache
-    tags: always
-    package:
-      update_cache: yes
-      cache_valid_time: 18000
-
-- hosts: all
-  become: true
-  tasks:
-
-  - name: upgrade packages
-    tags: always
-    apt:
-      upgrade: dist     
- 
-  - name: install the basic packages
-    tags: always
-    package:
-      name: [htop,neofetch,tree,zsh,ranger,unzip,git,vim-nox,speedtest-cli,python3-passlib,wget,curl,tmux,rsync,locate,numlockx]
-      state: latest 
-
-- hosts: all
-  become: true
-  tasks:
-
-  - name: copy tmux configuration file
-    copy:
-      src: .tmux.conf
-      dest: /home/eddie/
-      owner: eddie
-      mode: 0664
-
-- hosts: all
   roles:
-    - ansible-ohmyzsh
+    - basic_pkgs
+
+
+- hosts: singleuser,multiuser
+  become: true
+  roles:
+    - user_config
 
 - hosts: all
-  tasks:
-
-  - name: clone zsh auto-suggestion repo
-    git:
-      repo: https://github.com/zsh-users/zsh-autosuggestions.git
-      dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-
-  - name: clone zsh syntax highlighting repo
-    git:
-      repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
-      dest: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-
-  - name: clone zsh typewritten theme
-    git:
-      repo: https://github.com/reobin/typewritten.git
-      dest: ~/.oh-my-zsh/custom/themes/typewritten
+  become: true
+  roles:
+    - zsh
 
 - hosts: serverpi
   become: true
