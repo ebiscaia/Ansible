@@ -151,7 +151,7 @@
       state: restarted
     when: nfs_export.changed
 
-- hosts: [serverpi,192.168.1.140]
+- hosts: [apache,192.168.1.140]
   become: true
   tasks:
 
@@ -172,7 +172,7 @@
     file:
       path: '/var/www/webdav'
       state: directory
-      mode: '0755'
+      mode: '0775'
       owner: www-data
       group: eddie
      
@@ -272,6 +272,11 @@
 - hosts: another_lu
   become: true
   tasks:
+
+  - name: clone anotherlinuxuser repo
+    git:
+      repo: https://github.com/ebiscaia/another_linux_user.git
+      dest: /mnt/Backup/Windows/another_linux_user
 
   - name: create folder /var/www/another_linux_user
     tags: anu,website
