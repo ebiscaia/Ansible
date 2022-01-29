@@ -6,19 +6,7 @@
   roles:
     - first_setup
 
-############################################################################
-# Creates user eddie to single user clients and give him admin privileges
-# and creates the first password if necessary and uploads user ssh key
-
-- hosts: singleuser
-  become: true
-  roles:
-    - users
-  
-# Creates user eddie to clients and giveis him admin privileges and prompt
-# to change password if necessary and uploads user ssh key
-
-- hosts: all
+- hosts: [singleuser,multiuser]
   become: true
   roles:
     - users
