@@ -1,5 +1,33 @@
+- name: make Alpine accept sudo users
+  block:
+
+    - name: install sudo, bash packages
+      tags: firstrun,alpine
+      apk:
+        name: [sudo,bash]
+        state: latest      
+
+    - name: remove comment in the /etc/sudoers file
+      tags: firstrun,alpine
+      lineinfile:
+        path: /etc/sudoers
+        regex: '# %sudo'
+        line: '%sudo   ALL=(ALL:ALL) ALL'
+        owner: root
+        group: root
+        mode: 0440
+
+    - name: create sudo group
+      tags: firstrun,apline
+      group:
+        name: sudo
+        state: present
+        gid: 321
+
+  when: ansible_distribution == "Alpine"
+
 - name: create eddie user
-  tags: firstrun,singleuser
+  tags: firstrun
   user:
     name: "{{ item.name }}"
     password: "{{ item.passwd }}"
@@ -7,15 +35,15 @@
     create_home: yes
     groups: "{{ item.groups }}"
     append: yes
-  register: singleuser
+  register: user
   loop: "{{ users }}"
 
 - name: make /bin/bash the default shell on creation
-  tags: firstrun,singleuser
+  tags: firstrun
   user:
     name: "{{ item.name }}"
     shell: /bin/bash
-  when: singleuser.changed
+  when: user.changed
   loop: "{{ users }}"
 
 - name: copy sudoer_eddie file to /etc/sudoers.d/eddie
@@ -26,55 +54,45 @@
     owner: root
     group: root
     mode: 0440
-  when: singleuser.changed
+  when: user.changed
 
 - name: copy SSH key eddie user
-  tags: firstrun,singleuser
+  tags: firstrun
   authorized_key:
     user: eddie
     key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHwLqywqLhqZ5Nj03X6LYppdAUofFDCv8mNS+cOns/E7 eddie main key      
 
-- name: create eddie user
-  tags: firstrun,multiuser
-  user:
-    name: "{{ item.name }}"
-    password: "{{ item.passwd }}"
-    update_password: on_create
-    create_home: yes
-    groups: "{{ item.groups }}"
-    append: yes
-  register: multiuser
-  loop: "{{ users }}"
+- name: set PAM in Ansible (ansible user can ssh Alpine)
+  block:
 
-- name: make /bin/bash the default shell on creation
-  tags: firstrun,multiuser
-  user:
-    name: "{{ item.name }}"
-    shell: /bin/bash
-  when: multiuser.changed
-  loop: "{{ users }}"
+    - name: install openssh-server-pam package
+      apk:
+        name: openssh-server-pam
+        state: latest
 
-- name: copy sudoer_eddie file to /etc/sudoers.d/eddie
-  tags: firstrun,multiuser
-  copy:
-    src: sudoer_eddie
-    dest: /etc/sudoers.d/eddie
-    owner: root
-    group: root
-    mode: 0440
-  when: multiuser.changed
+    - name: edit sshd_config file to allow PAM
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regex: '# UsePAM'
+        line: 'UsePAM yes'
+        owner: root
+        group: root
+        mode: 0644
+      register: pam
 
-- name: copy SSH key eddie user
-  tags: multiuser,firstrun
-  authorized_key:
-    user: eddie
-    key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHwLqywqLhqZ5Nj03X6LYppdAUofFDCv8mNS+cOns/E7 eddie main key      
+    - name: restart sshd service
+      service:
+        name: sshd
+        state: restarted
+      when: pam.changed
+
+  when: ansible_distribution == "Alpine"
 
 - name: create ansible user
   tags: firstrun
   user:
     name: ansible
-    groups: root
+    groups: root,sudo
     shell: /bin/bash
 
 - name: copy sudoer_ansible file to /etc/sudoers.d/ansible
