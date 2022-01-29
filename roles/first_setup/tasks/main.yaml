@@ -2,17 +2,41 @@
   tags: always
   package:
     update_cache: yes
-    cache_valid_time: 18000
 
-- name: set timezone to Australia/Melbourne
-  tags: always
-  timezone:
-    name: Australia/Melbourne
-  register: timezone
+- name: set timezone to Australia/Melbourne (Ubuntu)
+  block:
+    
+    - name: change timezone setting
+      tags: always
+      timezone:
+        name: Australia/Melbourne
+      register: timezone
 
-- name: restart crond after timezone changes
-  tags: always
-  service:
-    name: cron
-    state: restarted
-  when: timezone.changed
+    - name: restart crond after timezone changes
+      tags: always
+      service:
+        name: cron
+        state: restarted
+      when: timezone.changed
+
+  when: ansible_distribution in ["Ubuntu","Debian"]
+
+- name: set timezone to Australia/Melbourne install tzdata package
+  block: 
+  
+    - name: install tzdata package
+      tags: always
+      apk:
+        name: tzdata
+        state: latest
+  
+    - name: copy the file with the timezone info 
+      tags: always
+      copy:
+        src: "/usr/share/zoneinfo/{{ item.region }}/{{ item.subregion }}"
+        dest: /etc/localtime
+        remote_src: yes
+      loop:
+        - { region: Australia, subregion: Melbourne }
+
+  when: ansible_distribution == "Alpine"
