@@ -1,0 +1,4 @@
+This is a text file just to text Ansible vault to hide sensitive data
+
+user: eddie
+pass: passwd
