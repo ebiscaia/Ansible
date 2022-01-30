@@ -35,15 +35,8 @@
     create_home: yes
     groups: "{{ item.groups }}"
     append: yes
+    shell: bash
   register: user
-  loop: "{{ users }}"
-
-- name: make /bin/bash the default shell on creation
-  tags: firstrun
-  user:
-    name: "{{ item.name }}"
-    shell: /bin/bash
-  when: user.changed
   loop: "{{ users }}"
 
 - name: copy sudoer_eddie file to /etc/sudoers.d/eddie
