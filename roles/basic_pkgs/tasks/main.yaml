@@ -22,9 +22,15 @@
 
   when: ansible_distribution == "Alpine"
 
-
 - name: install the basic packages
   tags: always
   package:
     name: [htop,neofetch,tree,zsh,ranger,unzip,git,"{{ vim }}",speedtest-cli,wget,curl,tmux,rsync,"{{ locate }}","{{ numlockx }}"]
     state: latest
+
+- name: install more basic packages for Alpine
+  tags: always
+  apk:
+    name: [lsof,less,lsblk,util-linux]
+    state: latest
+  when: ansible_distribution == "Alpine"
