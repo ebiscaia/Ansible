@@ -35,7 +35,7 @@
     create_home: yes
     groups: "{{ item.groups }}"
     append: yes
-    shell: bash
+    shell: /bin/bash
   register: user
   loop: "{{ users }}"
 
