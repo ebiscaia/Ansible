@@ -1,1 +1,1 @@
-eddie ALL=(ALL) NOPASSWD: ALL
+eddie ALL=(ALL:ALL) ALL
