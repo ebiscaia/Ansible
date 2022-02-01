@@ -5,8 +5,7 @@
 192.168.1.101 
 192.168.1.134
 192.168.1.110
-192.168.1.111
-192.168.1.112
+192.168.1.2492
 
 [ubuntu]
 192.168.1.134
@@ -14,8 +13,7 @@
 192.168.1.140
 
 [alpine]
-192.168.1.111 locate=findutils
-192.168.1.112 locate=findutils-locate
+192.168.1.249 locate=findutils-locate pip=py3-pip
 
 [raspberry_01]
 192.168.1.101
@@ -31,8 +29,12 @@ webdav
 192.168.1.110
 
 [nginx]
-192.168.1.111
-192.168.1.112
+
+[nginx:children]
+reverse_proxy
+
+[reverse_proxy]
+192.168.1.249
 
 [file_servers:children]
 serverpi
@@ -44,8 +46,7 @@ serverpi
 192.168.1.101
 192.168.1.134
 192.168.1.140
-192.168.1.111
-192.168.1.112
+192.168.1.249
 
 [multiuser]
 192.168.1.110
