@@ -40,6 +40,16 @@
   roles:
     - another_lu
 
+- hosts: nginx
+  become: true
+  roles:
+    - nginx
+
+- hosts: reverse_proxy
+  become: true
+  roles:
+    - reverse_proxy
+
 - hosts: ddclient, ddclient_fallback
   become: true
   roles:
