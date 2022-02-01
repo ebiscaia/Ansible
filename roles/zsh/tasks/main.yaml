@@ -1,60 +1,72 @@
 ---
+
 - name: Check if .zshrc exists
+  tags: zsh
   stat:
     path: ~/.zshrc
   register: stat_rc_result
 
 - name: Check if .oh-my-zsh exists
+  tags: zsh
   stat:
     path: ~/.oh-my-zsh
   register: stat_oh_my_zsh_result
 
 - name: Cloning  oh-my-zsh
+  tags: zsh
   git:
     repo=https://github.com/robbyrussell/oh-my-zsh
     dest=~/.oh-my-zsh
   when: not stat_oh_my_zsh_result.stat.exists
 
 - name: Creating new ~/.zshrc
+  tags: zsh
   copy:
     src=~/.oh-my-zsh/templates/zshrc.zsh-template
     dest=~/.zshrc
   when: not stat_rc_result.stat.exists
 
 - name: clone zsh auto-suggestion repo
+  tags: zsh
   git:
     repo: https://github.com/zsh-users/zsh-autosuggestions.git
     dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 
 - name: clone zsh syntax highlighting repo
+  tags: zsh
   git:
     repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
     dest: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 
 - name: clone zsh typewritten theme
+  tags: zsh
   git:
     repo: https://github.com/reobin/typewritten.git
     dest: ~/.oh-my-zsh/custom/themes/typewritten
 
 - name: remove comment from enable correction field
+  tags: zsh
   lineinfile:
     path: ~/.zshrc
     regexp: '^# ENABLE_CORRECTION="true"'
     line: 'ENABLE_CORRECTION="true"'
 
 - name: enable oh-my-zsh plugins
+  tags: zsh
   lineinfile:
     path: ~/.zshrc
     regexp: '^plugins='
     line: 'plugins=(git zsh-autosuggestions zsh-syntax-highlighting)'
 
 - name: comment original theme
+  tags: zsh
   lineinfile:
     path: ~/.zshrc
     regexp: '^ZSH_THEME="robby'
     line: '#ZSH_THEME="robbyrussel"'
 
 - name: insert reobin/typenwritten theme
+  tags: zsh
   blockinfile:
     path: ~/.zshrc
     marker: "## {mark} TypenWritten theme ##"
@@ -67,6 +79,7 @@
     insertafter: '^#ZSH_THEME="robby'
 
 - name: insert some aliases
+  tags: zsh
   blockinfile:
     path: ~/.zshrc
     marker: "## {mark} Aliases ##"
@@ -78,6 +91,7 @@
     insertafter: "^# alias"    
 
 - name: insert aliases for apt
+  tags: zsh
   blockinfile:
     path: ~/.zshrc
     marker: "## {mark} Apt aliases ##"
@@ -85,9 +99,25 @@
       alias aptu='sudo apt update; sudo apt upgrade -y; sudo apt autopurge -y'
       alias apti='sudo apt update; sudo apt install'
       alias aptd='sudo apt update; sudo apt autoremove -y'
+      alias apts='sudo apt search'
     insertafter: "^## END Aliases"
+  when: ansible_distribution in ["Ubuntu","Debian"]
+
+- name: insert aliases for apk
+  tags: zsh
+  blockinfile:
+    path: ~/.zshrc
+    marker: "## {mark} Apk aliases ##"
+    block: |
+      alias apku='sudo apk -U upgrade'
+      alias apki='sudo apt add'
+      alias apkd='sudo apk del'
+      alias apks='sudo apk search'
+    insertafter: "^## END Aliases"
+  when: ansible_distribution == "Alpine"
 
 - name: copy the .oh-my-zsh to users
+  tags: zsh
   copy:
     remote_src: yes
     src: /root/.oh-my-zsh
@@ -98,6 +128,7 @@
   loop: "{{ users }}"
 
 - name: copy the .zshrc file to users
+  tags: zsh
   copy:
     remote_src: yes
     src: /root/.zshrc
@@ -108,11 +139,6 @@
   loop: "{{ users }}"
 
 - name: make zsh the default shell for users
-  #  user:
-  #  name: "{{ item.name }}"
-  # shell: "{{ item.shell }}"
-  #loop: "{{ users }}"
-  #
   shell:
     cmd: "sed -i '/{{ item.name }}/s/[^\/]*sh$/zsh/' /etc/passwd"
   loop: "{{ users }}"
