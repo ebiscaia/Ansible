@@ -1,0 +1,5 @@
+- name: install nginx
+  tags: nginx,reverse_proxy
+  package:
+    name: nginx
+    state: latest

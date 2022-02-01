@@ -1,0 +1,78 @@
+
+- name: clone reverse-proxy git repository
+  tags: reverse_proxy
+  git:
+    repo: https://github.com/ebiscaia/reverse_proxy.git
+    dest: /home/eddie/reverse_proxy
+    force: yes
+
+- name: mount bind folder with /etc/nginx/http.d
+  tags: reverse_proxy
+  mount:
+    path: /etc/nginx/http.d
+    src: /home/eddie/reverse_proxy
+    opts: bind
+    state: mounted
+    fstype: none
+
+- name: install certbot-nginx package
+  tags: reverse_proxy
+  package:
+    name: certbot-nginx
+    state: latest
+
+- name: copy the letsencrypt zip file
+  tags: reverse_proxy
+  unarchive:
+    src: letsencrypt.zip
+    dest: /etc/
+    owner: root
+    group: root
+
+- name: create and install certificate using certbot --nginx plugin
+  tags: reverse_proxy
+  command: "certbot --nginx -d {{ item }} -m ebiscaia@me.com --agree-tos --noninteractive --redirect"
+  loop:
+    - anotherlinuxuser.ddnsfree.com
+    - eddienetworks.ddnsfree.com
+  register: certificate
+
+- name: restart nginx
+  tags: reverse_proxy
+  service:
+    name: nginx
+    state: restarted
+  when: certificate.changed or certicate_update.changed
+
+- name: copy dynu credentials to run certbot-dns-dynu plugin to upgrade the certicate
+  tags: reverse_proxy_update
+  copy:
+    src: dynu-credentials.ini
+    dest: /home/eddie/.dynu-credentials.ini
+    owner: eddie
+    group: eddie
+    mode: 0640
+
+- name: install python3-pip package (necessary to install certbot-dns-dynu plugin)
+  tags: reverse_proxy_update
+  package:
+    name: "{{ pip }}"
+    state: latest
+
+- name: install certbot-dns-dynu plugin using python3-pip
+  tags: reverse_proxy_update
+  pip:
+    name: certbot-dns-dynu
+    state: present
+
+- name: update the certificate using certbot-dns-dynu plugin
+  tags: reverse_proxy_update
+  command: "certbot renew --authenticator dns-dynu --dns-dynu-credentials /home/eddie/.dynu-credentials.ini --dns-dynu-propagation-seconds 90"
+  register: certicate_update
+
+- name: restart nginx
+  tags: reverse_proxy_update
+  service:
+    name: nginx
+    state: restarted
+  when: certificate.changed or certicate_update.changed
