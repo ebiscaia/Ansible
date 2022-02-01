@@ -9,10 +9,10 @@
 - name: prepare and upgrade Alpine Linux
   block:
 
-    - name: enable community repo
+    - name: enable edge repositories
       tags: upgrade
       shell:
-        cmd: sed -i '/[0-9]\/community$/s/.*.*http/http/' /etc/apk/repositories
+        cmd: sed -i '2s/^http/#http/' /etc/apk/repositories; sed -i '4,5s/#http/http/' /etc/apk/repositories
     
     - name: upgrade (Alpine)
       tags: always
