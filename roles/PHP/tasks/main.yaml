@@ -1,0 +1,6 @@
+- name: install PHP packages
+  tags: PHP
+  apt:
+    name: [php,php-apcu,php-bcmath,php-cli,php-common,php-curl,php-gd,php-gmp,php-imagick,php-intl,php-mbstring,php-mysql,php-zip,php-xml]
+    update_cache: yes
+    cache_valid_time: 18000
