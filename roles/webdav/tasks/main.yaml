@@ -45,7 +45,7 @@
   community.general.htpasswd:
     path: /mnt/Backup/.webdav/passwd.dav
     name: eddie
-    password: serverpi
+    password: "{{ webdav }}"
     owner: root
     group: www-data
     mode: 0640
