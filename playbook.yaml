@@ -22,6 +22,8 @@
 
 - hosts: serverpi
   become: true
+  vars_files:
+    - secrets.yaml
   roles:
     - serverpi
 
@@ -32,6 +34,8 @@
 
 - hosts: webdav
   become: true
+  vars_files:
+    - secrets.yaml
   roles:
     - webdav
 
