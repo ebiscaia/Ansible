@@ -40,3 +40,124 @@
         - { region: Australia, subregion: Melbourne }
 
   when: ansible_distribution == "Alpine"
+
+- name: check if VirtualBox Guest Additions (Ubuntu) is installed
+  tags: always
+  block:
+
+    - name: check if /root/.vbox.txt is present
+      stat:
+        path: /root/.vbox.txt
+      register: vbox
+
+    - name: display a message saying VirtualBox Guest Additions will be installed
+      debug:
+        msg: "VirtualBox Guest Additions needs to be installed. That will take a while"
+      when: not vbox.stat.exists
+
+    - name: display a message saying VirtualBox Guest Additions won't be installed
+      debug:
+        msg: "VirtualBox Guest Additions does not need to be installed. Skipping process"
+      when: vbox.stat.exists
+
+  when:
+    - ansible_virtualization_type == "virtualbox"
+    - ansible_distribution in ["Ubuntu","Debian"]
+
+- name: install VirtualBox Guest Additions (Ubuntu)
+  tags: always
+  block:
+
+    - name: install requirement packages
+      package:
+        name: [gcc,make,bzip2]
+        state: latest
+
+    - name: copy VirtualBox Guest Addition disc image
+      copy:
+        src: VBoxGuestAdditions.iso
+        dest: /home/eddie/
+        owner: eddie
+        group: eddie
+        mode: 0777
+
+    - name: mount the .iso image
+      mount:
+        path: /media
+        src: /home/eddie/VBoxGuestAdditions.iso
+        fstype: iso9660
+        opts: loop
+        state: mounted
+          
+    - name: install VirtualBox Guest Additions executable file
+      command: /media/VBoxLinuxAdditions.run
+      ignore_errors: yes
+
+    - name: unmount disc and remove /etc/fstab information
+      mount:
+        path: /media
+        state: absent
+
+    - name: delete VirtualBox Guest Addition disc image
+      file:
+        path: /home/eddie/VBoxGuestAdditions.iso
+        state: absent
+
+    - name: create /root/.vbox.txt file to confirm installation
+      file:
+        path: /root/.vbox.txt
+        state: touch
+        owner: root
+        group: root
+
+    - name: reboot machine to load the kernel modules
+      reboot:
+
+  when: 
+    - ansible_virtualization_type == "virtualbox"
+    - ansible_distribution in ["Ubuntu","Debian"]
+    - not vbox.stat.exists
+
+- name: install VirtualBox Guest Additions (Alpine)
+  tags: always
+  block:
+
+    - name: install virtualbox-guest-additions package
+      apk:
+        name: virtualbox-guest-additions
+        state: latest
+
+    - name: enable modules
+      shell: 
+        cmd: "echo {{ item }} >> /etc/modules" 
+      loop:
+        - vboxdrv
+        - vboxnetflt
+        - vboxpci
+
+    - name: enable and start virtualbox-guest-additions service
+      service:
+        name: virtualbox-guest-additions
+        state: started
+        enabled: yes
+
+  when: 
+    - ansible_virtualization_type == "virtualbox"
+    - ansible_distribution == "Alpine"
+
+- name: install qemu-guest-agent
+  tags: always
+  block:
+
+    - name: install qemu-guest-agent package
+      package:
+        name: qemu-guest-agent
+        state: latest
+
+    - name: start and enable qemu-guest-agent service
+      service:
+        name: qemu-guest-agent
+        state: started
+        enabled: yes
+
+  when: ansible_virtualization_type == "kvm"
