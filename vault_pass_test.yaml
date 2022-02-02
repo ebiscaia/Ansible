@@ -4,7 +4,7 @@
   hosts: 192.168.1.101
   become: true
   vars_files:
-    - secret.yaml
+    - vault_pass_test_secret.yaml 
   tasks:
 
     - name: copy this file being part of its path name encrypted
