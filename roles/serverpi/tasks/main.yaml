@@ -36,7 +36,7 @@
 - name: Create samba users
   shell: "(echo {{ item.smbpass }}; echo {{ item.smbpass }}) | smbpasswd -s -a {{ item.user }}"
   loop:
-  - { user: 'eddie', smbpass: 'serverpi' }
+  - { user: 'eddie', smbpass: '{{ smbpass }}' }
   register: smbuser
 
 - name: restart samba service
