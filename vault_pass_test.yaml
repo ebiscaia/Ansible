@@ -1,4 +1,16 @@
-This is a text file just to text Ansible vault to hide sensitive data
+---
 
-user: eddie
-pass: passwd
+- name: test ansible vault for passwords
+  hosts: 192.168.1.101
+  become: true
+  vars_files:
+    - secret.yaml
+  tasks:
+
+    - name: copy this file being part of its path name encrypted
+      copy:
+        src: "/home/eddie/{{ secret }}/vault_pass_test.yaml"
+        dest: /home/eddie/
+        owner: eddie
+        group: eddie
+        mode: 0700
