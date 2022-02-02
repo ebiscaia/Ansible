@@ -69,3 +69,23 @@
   roles:
     - ddclient_fallback
 
+- hosts: mariaDB
+  become: true
+  roles:
+    - mariaDB
+
+- hosts: PHP
+  become: true
+  roles:
+    - PHP
+
+- hosts: redis
+  become: true
+  roles:
+    - redis
+
+- hosts: nextcloud
+  become: true
+  roles:
+    - nextcloud
+    - nextcloud_pos_install

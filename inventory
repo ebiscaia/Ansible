@@ -8,6 +8,16 @@
 192.168.1.249
 192.168.1.111
 
+[singleuser]
+192.168.1.101
+192.168.1.134
+192.168.1.140
+192.168.1.249
+192.168.1.111
+
+[multiuser]
+192.168.1.110
+
 [ubuntu]
 192.168.1.134
 192.168.1.110
@@ -23,6 +33,7 @@
 [apache:children]
 another_lu
 webdav
+nextcloud
 
 [another_lu]
 192.168.1.110
@@ -38,21 +49,23 @@ reverse_proxy
 [reverse_proxy]
 192.168.1.249
 
+[PHP:children]
+nextcloud
+
+[mariaDB:children]
+nextcloud
+
 [file_servers:children]
 serverpi
 
 [serverpi]
 192.168.1.110
 
-[singleuser]
-192.168.1.101
-192.168.1.134
-192.168.1.140
-192.168.1.249
-192.168.1.111
+[redis:children]
+nextcloud
 
-[multiuser]
-192.168.1.110
+[nextcloud]
+192.168.1.134
 
 [ddclient]
 192.168.1.101
