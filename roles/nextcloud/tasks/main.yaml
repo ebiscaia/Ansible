@@ -77,3 +77,23 @@
     login_user: root
     login_password: "{{ nextcloud_mariadb_root_pass }}" 
 
+- name: php.ini configuration 
+  tags: nextcloud
+  lineinfile:
+    path: /etc/php/8.0/apache2/php.ini
+    regexp: '{{ item.regexp }}' 
+    line: '{{ item.line }}'
+  loop:
+    - { regexp: "^memory_limit =",                  line: "memory_limit = 512M" }
+    - { regexp: "^upload_max_filesize =",           line: "upload_max_filesize = 200M" }
+    - { regexp: "^max_execution_time = ",           line: "max_execution_time = 360" }
+    - { regexp: "^post_max_size =",                 line: "post_max_size = 200M" }
+    - { regexp: "^date.timezone =",                 line: "date.timezone = Australia/Melbourne" }
+    - { regexp: "opcache.enable=",                  line: "opcache.enable=1" }
+    - { regexp: "opcache.interned_strings_buffer=", line: "opcache.interned_strings_buffer=8" }
+    - { regexp: "opcache.max_accelerated_files=",   line: "opcache.max_accelerated_files=10000" }
+    - { regexp: "opcache.memory_consumption=",      line: "opcache.memory_consumption=128" }
+    - { regexp: "opcache.save_comments=",           line: "opcache.save_comments=1" }
+    - { regexp: "opcache.revalidate_freq=",         line: "opcache.revalidate_freq=1" }
+
+
