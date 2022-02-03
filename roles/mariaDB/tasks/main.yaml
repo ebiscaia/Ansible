@@ -1,7 +1,14 @@
-- name: install mariadb package
+- name: install mariadb-server and python3-mysql packages
   tags: mariadb
   package:
-    name: mariadb-server
+    name: [mariadb-server,python3-pymysql]
     state: latest
     update_cache: yes
     cache_valid_time: 18000
+
+- name: start and enable mariadb-server
+  tags: mariadb
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
