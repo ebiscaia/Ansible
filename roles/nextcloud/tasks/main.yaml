@@ -1,0 +1,60 @@
+- name: check if /root/.mariadb.txt is present
+  tags: nextcloud
+  stat:
+    path: /root/.mariadb.txt
+  register: mariadb
+
+- name: secure mariaDB database
+  tags: nextcloud
+  block:
+
+    - name: removes all anonymous user accounts
+      mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+        login_unix_socket: /run/mysqld/mysqld.sock
+
+    - name: Remove MySQL test database
+      mysql_db:
+        name: test
+        state: absent
+        login_unix_socket: /run/mysqld/mysqld.sock
+
+    - name: Reload privilege tables
+      mysql_query:
+        login_unix_socket: /run/mysqld/mysqld.sock
+        query: 
+          - FLUSH PRIVILEGES
+
+    - name: set root password mariadb
+      mysql_user:
+        login_user: root
+        login_password: "{{ nextcloud_mariadb_root_pass }}"
+        user: root
+        password: "{{ nextcloud_mariadb_root_pass }}"
+        login_unix_socket: /run/mysqld/mysqld.sock  
+        host: "{{ item }}"
+      loop:
+        - localhost
+        - ::1
+        - 127.0.0.1
+
+    - name: delete remote root
+      mysql_user:
+        login_user: root
+        login_password: mariaroot
+        login_unix_socket: /run/mysqld/mysqld.sock
+        user: root
+        host: "{{ ansible_fqdn }}"
+        state: absent
+    
+    - name: create a file to prevent this block to run again
+      file:
+        path: /root/.mariadb.txt
+        state: touch
+        owner: root
+        group: root
+
+  when: not mariadb.stat.exists
+          
