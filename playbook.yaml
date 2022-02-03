@@ -86,6 +86,8 @@
 
 - hosts: nextcloud
   become: true
+  vars_files:
+    - secrets.yaml
   roles:
     - nextcloud
     - nextcloud_pos_install
