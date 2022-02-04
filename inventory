@@ -1,6 +1,6 @@
 [ansible]
 192.168.1.140 'ansible_python_interpreter=/usr/bin/python3'
-
+192.168.1.141
 [clients]
 192.168.1.101 
 192.168.1.134
@@ -17,6 +17,7 @@
 
 [multiuser]
 192.168.1.110
+192.168.1.141
 
 [ubuntu]
 192.168.1.134
@@ -26,6 +27,9 @@
 [alpine]
 192.168.1.249 locate=findutils-locate pip=py3-pip
 192.168.1.111
+
+[rocky]
+192.168.1.141
 
 [raspberry_01]
 192.168.1.101
