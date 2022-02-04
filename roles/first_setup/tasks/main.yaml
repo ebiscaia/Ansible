@@ -17,9 +17,11 @@
       service:
         name: cron
         state: restarted
-      when: timezone.changed
+      when:
+        - timezone.changed
+        - ansible_distribution not "Rocky"
 
-  when: ansible_distribution in ["Ubuntu","Debian"]
+  when: ansible_distribution in ["Ubuntu","Debian","Rocky"]
 
 - name: set timezone to Australia/Melbourne install tzdata package
   block: 
@@ -62,9 +64,9 @@
 
   when:
     - ansible_virtualization_type == "virtualbox"
-    - ansible_distribution in ["Ubuntu","Debian"]
+    - ansible_distribution in ["Ubuntu","Debian","Rocky"]
 
-- name: install VirtualBox Guest Additions (Ubuntu)
+- name: install VirtualBox Guest Additions (Ubuntu/Debian/Rocky)
   tags: always
   block:
 
@@ -115,7 +117,7 @@
 
   when: 
     - ansible_virtualization_type == "virtualbox"
-    - ansible_distribution in ["Ubuntu","Debian"]
+    - ansible_distribution in ["Ubuntu","Debian","Rocky"]
     - not vbox.stat.exists
 
 - name: install VirtualBox Guest Additions (Alpine)
