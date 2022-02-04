@@ -1,4 +1,4 @@
 ---
 
 users:
-  - { name: 'eddie', groups: 'sudo,users', shell: '/usr/bin/zsh', passwd: '$1$zxzUnL3B$LGqg.T838RZWrTxjQ5ORf.' }
+  - { name: 'eddie', groups: 'sudo,wheel,users', shell: '/usr/bin/zsh', passwd: '$1$zxzUnL3B$LGqg.T838RZWrTxjQ5ORf.' }
