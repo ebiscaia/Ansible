@@ -17,14 +17,16 @@
         group: root
         mode: 0440
 
-    - name: create sudo group
-      tags: firstrun,apline
-      group:
-        name: sudo
-        state: present
-        gid: 321
-
   when: ansible_distribution == "Alpine"
+
+- name: create sudo/wheel groups
+  tags: firstrun
+  group:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - sudo
+    - wheel
 
 - name: create eddie user
   tags: firstrun
@@ -38,6 +40,7 @@
     shell: /bin/bash
   register: user
   loop: "{{ users }}"
+
 
 - name: copy sudoer_eddie file to /etc/sudoers.d/eddie
   tags: firstrun,singleuser
