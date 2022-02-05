@@ -1,0 +1,97 @@
+- name: check if nextcloud post install can be started
+  tags: nextcloud_pos_install
+  stat:
+    path: /root/.nextcloud.txt
+  register: nextcloud
+
+- name: edit config.php file block
+  tags: nextcloud_pos_install
+  block:
+
+    - name: insert nextcloud domain as trusted domains array
+      lineinfile:
+        path: /var/www/nextcloud/config/config.php
+        insertafter: '0 =>'
+        line: "    1 => 'nextcloud.eddienetworks.ddnsfree.com',"
+
+    - name: replace overwrite.cli.urlfield
+      lineinfile:
+        path: /var/www/nextcloud/config/config.php
+        regexp: 'overwrite.cli.url'
+        line: "  'overwrite.cli.url' => 'https://nextcloud.eddienetworks.ddnsfree.com',"
+
+    - name: add overwriteprotocol field
+      lineinfile:
+        path: /var/www/nextcloud/config/config.php
+        insertafter: 'overwrite.cli.url'
+        line: "  'overwriteprotocol' => 'https',"
+
+    - name: add remaning of the configuration
+      blockinfile:
+        dest: /var/www/nextcloud/config/config.php
+        block: "{{ lookup('file', 'config.txt') }}"
+        insertafter: "installed"
+        backup: yes
+        marker: "// {mark} ANSIBLE MANAGED BLOCK \\ "
+
+  when: nextcloud.stat.exists
+
+- name: add user www-data to redis group
+  tags: nextcloud_pos_install
+  user:
+    name: www-data 
+    groups: redis
+    append: yes
+
+- name: restart apache webserver
+  tags: nextcloud_pos_install
+  service:
+    name: apache2
+    state: restarted
+
+- name: add a cron job to config.php every 5min
+  tags: nextcloud_pos_install
+  cron:
+    name: "config.php"
+    minute: "*/5"
+    hour: "*"
+    job: "php -f /var/www/nextcloud/cron.php"
+    user: www-data
+
+- name: create /mnt/nextcloud folder to mount usb stick
+  tags: nextcloud_pos_install
+  file:
+    path: /mnt/nextcloud 
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0750
+
+- name: mount usb stick and create /etc/fstab mount point
+  tags: nextcloud_pos_install
+  mount:
+    path: /mnt/nextcloud
+    src: UUID=eb090bfd-603a-44c3-a503-87536aa53e74
+    fstype: ext4 
+    opts: uid=www-data,gid=www-data,fmask=002,dmask=027
+    state: mounted
+
+- name: create folders to create a mount bind
+  tags: nextcloud_pos_install
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0750
+  loop:
+    - /mnt/nextcloud/eddie/files
+    - /var/www/nextcloud/data/eddie/files
+
+- name: mount bind the folders created
+  tags: nextcloud_pos_install
+  mount:
+    src: /mnt/nextcloud/eddie/files
+    dest: /mnt/nextcloud/eddie/files
+    fstype: bind
+    mode: mounted

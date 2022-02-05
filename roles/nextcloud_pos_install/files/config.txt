@@ -1,0 +1,18 @@
+  'default_phone_region' => 'AU',
+  'mail_from_address' => 'ebiscaia',
+  'mail_smtpmode' => 'smtp',
+  'mail_sendmailmode' => 'smtp',
+  'mail_domain' => 'me.com',
+  'mail_smtphost' => 'smtp.mail.me.com',
+  'mail_smtpport' => '587',
+  'mail_smtpsecure' => 'tls',
+  'mail_smtpauth' => 1,
+  'mail_smtpauthtype' => 'PLAIN',
+  'filelocking.enabled' => true,
+  'memcache.local' => '\\OC\\Memcache\\Redis',
+  'memcache.locking' => '\\OC\\Memcache\\Redis',
+  'redis' =>
+  array (
+  'host' => '127.0.0.1',
+  'port' => 6379,
+  ),
