@@ -1,11 +1,11 @@
 - name: check if nextcloud post install can be started
-  tags: nextcloud_pos_install
+  tags: nextcloud_post"_install
   stat:
     path: /root/.nextcloud.txt
   register: nextcloud
 
 - name: edit config.php file block
-  tags: nextcloud_pos_install
+  tags: nextcloud_post_install
   block:
 
     - name: insert nextcloud domain as trusted domains array
@@ -37,20 +37,20 @@
   when: nextcloud.stat.exists
 
 - name: add user www-data to redis group
-  tags: nextcloud_pos_install
+  tags: nextcloud_post_install
   user:
     name: www-data 
     groups: redis
     append: yes
 
 - name: restart apache webserver
-  tags: nextcloud_pos_install
+  tags: nextcloud_post_install
   service:
     name: apache2
     state: restarted
 
 - name: add a cron job to config.php every 5min
-  tags: nextcloud_pos_install
+  tags: nextcloud_post_install
   cron:
     name: "config.php"
     minute: "*/5"
@@ -59,7 +59,7 @@
     user: www-data
 
 - name: create /mnt/nextcloud folder to mount usb stick
-  tags: nextcloud_pos_install
+  tags: nextcloud_post_install
   file:
     path: /mnt/nextcloud 
     state: directory
@@ -68,7 +68,7 @@
     mode: 0750
 
 - name: mount usb stick and create /etc/fstab mount point
-  tags: nextcloud_pos_install
+  tags: nextcloud_post_install
   mount:
     src: UUID=eb090bfd-603a-44c3-a503-87536aa53e74
     path: /mnt/nextcloud
@@ -76,7 +76,7 @@
     state: mounted
 
 - name: create folders to create a mount bind
-  tags: nextcloud_pos_install
+  tags: nextcloud_post_install
   file:
     path: "{{ item }}"
     state: directory
@@ -88,7 +88,7 @@
     - /var/www/nextcloud/data/eddie/files/usb
 
 - name: mount bind the folders created
-  tags: nextcloud_pos_install
+  tags: nextcloud_post_install
   mount:
     src: /mnt/nextcloud/eddie/files
     path: /var/www/nextcloud/data/eddie/files/usb 
