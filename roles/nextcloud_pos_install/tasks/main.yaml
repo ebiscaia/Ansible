@@ -82,16 +82,16 @@
     state: directory
     owner: eddie
     group: www-data
-    mode: 0750
+    mode: 0770
   loop:
     - /mnt/nextcloud/eddie/files
-    - /var/www/nextcloud/data/eddie/files
+    - /var/www/nextcloud/data/eddie/files/usb
 
 - name: mount bind the folders created
   tags: nextcloud_pos_install
   mount:
     src: /mnt/nextcloud/eddie/files
-    path: /var/www/nextcloud/data/eddie/files 
+    path: /var/www/nextcloud/data/eddie/files/usb 
     fstype: none
     state: mounted
     opts: bind
