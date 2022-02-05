@@ -70,10 +70,9 @@
 - name: mount usb stick and create /etc/fstab mount point
   tags: nextcloud_pos_install
   mount:
-    path: /mnt/nextcloud
     src: UUID=eb090bfd-603a-44c3-a503-87536aa53e74
-    fstype: ext4 
-    opts: uid=www-data,gid=www-data,fmask=002,dmask=027
+    path: /mnt/nextcloud
+    fstype: auto
     state: mounted
 
 - name: create folders to create a mount bind
@@ -81,7 +80,7 @@
   file:
     path: "{{ item }}"
     state: directory
-    owner: www-data
+    owner: eddie
     group: www-data
     mode: 0750
   loop:
@@ -92,6 +91,7 @@
   tags: nextcloud_pos_install
   mount:
     src: /mnt/nextcloud/eddie/files
-    dest: /mnt/nextcloud/eddie/files
-    fstype: bind
-    mode: mounted
+    path: /var/www/nextcloud/data/eddie/files 
+    fstype: none
+    state: mounted
+    opts: bind
