@@ -3,72 +3,73 @@
 - name: Check if .zshrc exists
   tags: zsh
   stat:
-    path: ~/.zshrc
+    path: /home/ansible/.zshrc
   register: stat_rc_result
 
 - name: Check if .oh-my-zsh exists
   tags: zsh
   stat:
-    path: ~/.oh-my-zsh
+    path: /home/ansible/.oh-my-zsh
   register: stat_oh_my_zsh_result
 
 - name: Cloning  oh-my-zsh
   tags: zsh
   git:
-    repo=https://github.com/robbyrussell/oh-my-zsh
-    dest=~/.oh-my-zsh
+    repo: https://github.com/robbyrussell/oh-my-zsh
+    dest: /home/ansible/.oh-my-zsh
   when: not stat_oh_my_zsh_result.stat.exists
 
 - name: Creating new ~/.zshrc
   tags: zsh
   copy:
-    src=~/.oh-my-zsh/templates/zshrc.zsh-template
-    dest=~/.zshrc
+    src: /home/ansible/.oh-my-zsh/templates/zshrc.zsh-template
+    dest: /home/ansible/.zshrc
+    remote_src: yes
   when: not stat_rc_result.stat.exists
 
 - name: clone zsh auto-suggestion repo
   tags: zsh
   git:
     repo: https://github.com/zsh-users/zsh-autosuggestions.git
-    dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+    dest: /home/ansible/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 
 - name: clone zsh syntax highlighting repo
   tags: zsh
   git:
     repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
-    dest: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+    dest: /home/ansible/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 
 - name: clone zsh typewritten theme
   tags: zsh
   git:
     repo: https://github.com/reobin/typewritten.git
-    dest: ~/.oh-my-zsh/custom/themes/typewritten
+    dest: /home/ansible/.oh-my-zsh/custom/themes/typewritten
 
 - name: remove comment from enable correction field
   tags: zsh
   lineinfile:
-    path: ~/.zshrc
+    path: /home/ansible/.zshrc
     regexp: '^# ENABLE_CORRECTION="true"'
     line: 'ENABLE_CORRECTION="true"'
 
 - name: enable oh-my-zsh plugins
   tags: zsh
   lineinfile:
-    path: ~/.zshrc
+    path: /home/ansible/.zshrc
     regexp: '^plugins='
     line: 'plugins=(git zsh-autosuggestions zsh-syntax-highlighting)'
 
 - name: comment original theme
   tags: zsh
   lineinfile:
-    path: ~/.zshrc
+    path: /home/ansible/.zshrc
     regexp: '^ZSH_THEME="robby'
     line: '#ZSH_THEME="robbyrussel"'
 
 - name: insert reobin/typenwritten theme
   tags: zsh
   blockinfile:
-    path: ~/.zshrc
+    path: /home/ansible/.zshrc
     marker: "## {mark} TypenWritten theme ##"
     block: |
       ZSH_THEME="typewritten/typewritten"
@@ -81,7 +82,7 @@
 - name: insert some aliases
   tags: zsh
   blockinfile:
-    path: ~/.zshrc
+    path: /home/ansible/.zshrc
     marker: "## {mark} Aliases ##"
     block: |
       alias l='ls -CF'
@@ -93,7 +94,7 @@
 - name: insert aliases for apt
   tags: zsh
   blockinfile:
-    path: ~/.zshrc
+    path: /home/ansible/.zshrc
     marker: "## {mark} Apt aliases ##"
     block: |
       alias aptu='sudo apt update; sudo apt upgrade -y; sudo apt autopurge -y'
@@ -106,7 +107,7 @@
 - name: insert aliases for apk
   tags: zsh
   blockinfile:
-    path: ~/.zshrc
+    path: /home/ansible/.zshrc
     marker: "## {mark} Apk aliases ##"
     block: |
       alias apku='sudo apk -U upgrade'
@@ -116,11 +117,32 @@
     insertafter: "^## END Aliases"
   when: ansible_distribution == "Alpine"
 
+- name: insert aliases for dnf 
+  tags: zsh
+  blockinfile:
+    path: /home/ansible/.zshrc
+    marker: "## {mark} Dnf aliases ##"
+    block: |
+      alias dnfu='sudo dnf upgrade -y'
+      alias dnfi='sudo dnf install'
+      alias dnfdd='sudo dnf remove'
+      alias dnfs='sudo dnf search'
+    insertafter: "^## END Aliases"
+  when: ansible_distribution in ["Rocky"]
+
+- name: insert alias for python3
+  tags: zsh
+  lineinfile:
+    path: /home/ansible/.zshrc
+    line: "alias python3='python3.10'"
+    insertafter: EOF
+  when: ansible_distribution in ["Rocky"]
+
 - name: copy the .oh-my-zsh to users
   tags: zsh
   copy:
     remote_src: yes
-    src: /root/.oh-my-zsh
+    src: /home/ansible/.oh-my-zsh
     dest: "/home/{{ item.name }}/"
     owner: "{{ item.name }}"
     group: "{{ item.name }}"
@@ -131,7 +153,7 @@
   tags: zsh
   copy:
     remote_src: yes
-    src: /root/.zshrc
+    src: /home/ansible/.zshrc
     dest: "/home/{{ item.name }}/"
     owner: "{{ item.name }}"
     group: "{{ item.name }}"
