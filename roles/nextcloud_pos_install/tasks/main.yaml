@@ -95,3 +95,14 @@
     fstype: none
     state: mounted
     opts: bind
+
+- name: add cron job for cron.php
+  tags: nextcloud_post_install
+  cron:
+    name: "cronj.php"
+    minute: "*/10"
+    hour: "*"
+    job: "{{ item }}"
+  loop:
+    - "sudo -u www-data php -f /var/www/nextcloud/cron.php"
+    - "sudo -u www-data php /var/www/nextcloud/occ files:scan --all"
