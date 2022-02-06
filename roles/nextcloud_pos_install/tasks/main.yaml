@@ -1,8 +1,14 @@
-- name: check if nextcloud post install can be started
-  tags: nextcloud_post"_install
+- name: check if nextcloud post install can be started - condition 01
+  tags: nextcloud_post_install
   stat:
     path: /root/.nextcloud.txt
   register: nextcloud
+
+- name: check if nextcloud post install can be started - condition 02
+  tags: nextcloud_post_install
+  stat:
+    path: /root/.nextcloud_post_install.txt
+  register: nextcloud_post_install
 
 - name: edit config.php file block
   tags: nextcloud_post_install
@@ -34,75 +40,78 @@
         backup: yes
         marker: "// {mark} ANSIBLE MANAGED BLOCK \\ "
 
-  when: nextcloud.stat.exists
+    - name: add user www-data to redis group
+      tags: nextcloud_post_install
+      user:
+        name: www-data 
+        groups: redis
+        append: yes
+      register: redis
 
-- name: add user www-data to redis group
-  tags: nextcloud_post_install
-  user:
-    name: www-data 
-    groups: redis
-    append: yes
+    - name: restart apache webserver
+      tags: nextcloud_post_install
+      service:
+        name: apache2
+        state: restarted
+      when: redis.changed
 
-- name: restart apache webserver
-  tags: nextcloud_post_install
-  service:
-    name: apache2
-    state: restarted
+    - name: create /mnt/nextcloud folder to mount usb stick
+      tags: nextcloud_post_install
+      file:
+        path: /mnt/nextcloud 
+        state: directory
+        owner: eddie
+        group: www-data
+        mode: 0770
 
-- name: add a cron job to config.php every 5min
-  tags: nextcloud_post_install
-  cron:
-    name: "config.php"
-    minute: "*/5"
-    hour: "*"
-    job: "php -f /var/www/nextcloud/cron.php"
-    user: www-data
+    - name: mount usb stick and create /etc/fstab mount point
+      tags: nextcloud_post_install
+      mount:
+        src: UUID=eb090bfd-603a-44c3-a503-87536aa53e74
+        path: /mnt/nextcloud
+        fstype: auto
+        state: mounted
 
-- name: create /mnt/nextcloud folder to mount usb stick
-  tags: nextcloud_post_install
-  file:
-    path: /mnt/nextcloud 
-    state: directory
-    owner: www-data
-    group: www-data
-    mode: 0750
+    - name: create folders to create a mount bind
+      tags: nextcloud_post_install
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: eddie
+        group: www-data
+        mode: 0770
+      loop:
+        - /mnt/nextcloud/eddie/files
+        - /var/www/nextcloud/data/eddie/files
 
-- name: mount usb stick and create /etc/fstab mount point
-  tags: nextcloud_post_install
-  mount:
-    src: UUID=eb090bfd-603a-44c3-a503-87536aa53e74
-    path: /mnt/nextcloud
-    fstype: auto
-    state: mounted
+    - name: mount bind the folders created
+      tags: nextcloud_post_install
+      mount:
+        src: /mnt/nextcloud/eddie/files
+        path: /var/www/nextcloud/data/eddie/files 
+        fstype: none
+        state: mounted
+        opts: bind
 
-- name: create folders to create a mount bind
-  tags: nextcloud_post_install
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: eddie
-    group: www-data
-    mode: 0770
-  loop:
-    - /mnt/nextcloud/eddie/files
-    - /var/www/nextcloud/data/eddie/files/usb
+    - name: add cron job for cron.php
+      tags: nextcloud_post_install
+      cron:
+        name: "cronj.php"
+        minute: "*/10"
+        hour: "*"
+        job: "{{ item }}"
+      loop:
+        - "sudo -u www-data php -f /var/www/nextcloud/cron.php"
+        - "sudo -u www-data php /var/www/nextcloud/occ files:scan --all"
+   
+    - name: create the file /root/.nextcloud_post_install.txt
+      file:
+        path: /root/.nextcloud_post_install.txt
+        state: touch
+        owner: root
+        group: eddie
+        mode: 0770
 
-- name: mount bind the folders created
-  tags: nextcloud_post_install
-  mount:
-    src: /mnt/nextcloud/eddie/files
-    path: /var/www/nextcloud/data/eddie/files/usb 
-    fstype: none
-    state: mounted
-    opts: bind
-
-- name: add cron job for cron.php
-  tags: nextcloud_post_install
-  cron:
-    name: "cronj.php"
-    minute: "*/10"
-    hour: "*"
-    job: "{{ item }}"
-  loop:
-    - "sudo -u www-data php -f /var/www/nextcloud/cron.php"
-    - "sudo -u www-data php /var/www/nextcloud/occ files:scan --all"
+  when: 
+    - nextcloud.stat.exists
+    - not nextcloud_post_install.stat.exists
