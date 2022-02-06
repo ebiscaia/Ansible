@@ -54,62 +54,78 @@
         path: /root/.mariadb.txt
         state: touch
         owner: root
-        group: root
+        group: eddie
+        mode: 0770 
 
   when: not mariadb.stat.exists
 
-- name: create nextcloud database
-  tags: nextcloud
-  mysql_db:
-    name: nextcloud
-    state: present
-    login_user: root
-    login_password: "{{ nextcloud_mariadb_root_pass }}"
-
-- name: create user nextcloud and grant all privileges to nextcloud database
-  tags: nextcloud
-  mysql_user:
-    state: present
-    name: nextcloud
-    password: "{{ nextcloud_mariadb_user_pass }}" 
-    priv:
-      'nextcloud.*': 'ALL'
-    login_user: root
-    login_password: "{{ nextcloud_mariadb_root_pass }}" 
-
-- name: php.ini configuration 
-  tags: nextcloud
-  lineinfile:
-    path: /etc/php/8.0/apache2/php.ini
-    regexp: '{{ item.regexp }}' 
-    line: '{{ item.line }}'
-  loop:
-    - { regexp: "^memory_limit =",                  line: "memory_limit = 512M" }
-    - { regexp: "^upload_max_filesize =",           line: "upload_max_filesize = 200M" }
-    - { regexp: "^max_execution_time = ",           line: "max_execution_time = 360" }
-    - { regexp: "^post_max_size =",                 line: "post_max_size = 200M" }
-    - { regexp: "^date.timezone =",                 line: "date.timezone = Australia/Melbourne" }
-    - { regexp: "opcache.enable=",                  line: "opcache.enable=1" }
-    - { regexp: "opcache.interned_strings_buffer=", line: "opcache.interned_strings_buffer=8" }
-    - { regexp: "opcache.max_accelerated_files=",   line: "opcache.max_accelerated_files=10000" }
-    - { regexp: "opcache.memory_consumption=",      line: "opcache.memory_consumption=128" }
-    - { regexp: "opcache.save_comments=",           line: "opcache.save_comments=1" }
-    - { regexp: "opcache.revalidate_freq=",         line: "opcache.revalidate_freq=1" }
-
-- name: check if nextcloud files exit
+- name: check if the file /root/.nextcloud.txt exists
   tags: nextcloud
   stat:
-    path: /var/www/nextcloud
-  register: nextcloud_folder
+    path: /root/.nextcloud.txt
+  register: nextcloud
 
-- name: download and move nextcloud files to /var/www/nextcloud
+- name: set database, PHP config file and download block
   tags: nextcloud
-  unarchive:
-    src: https://download.nextcloud.com/server/releases/nextcloud-23.0.0.zip
-    dest: /var/www/
-    remote_src: yes
-    owner: www-data
-    group: www-data
-    mode: '0755'
-  when: not nextcloud_folder.stat.exists
+  block:
 
+    - name: create nextcloud database
+      mysql_db:
+        name: nextcloud
+        state: present
+        login_user: root
+        login_password: "{{ nextcloud_mariadb_root_pass }}"
+
+    - name: create user nextcloud and grant all privileges to nextcloud database
+      mysql_user:
+        state: present
+        name: nextcloud
+        password: "{{ nextcloud_mariadb_user_pass }}" 
+        priv:
+          'nextcloud.*': 'ALL'
+        login_user: root
+        login_password: "{{ nextcloud_mariadb_root_pass }}" 
+
+    - name: php.ini configuration 
+      lineinfile:
+        path: /etc/php/8.0/apache2/php.ini
+        regexp: '{{ item.regexp }}' 
+        line: '{{ item.line }}'
+      loop:
+        - { regexp: "^memory_limit =",                  line: "memory_limit = 512M" }
+        - { regexp: "^upload_max_filesize =",           line: "upload_max_filesize = 200M" }
+        - { regexp: "^max_execution_time = ",           line: "max_execution_time = 360" }
+        - { regexp: "^post_max_size =",                 line: "post_max_size = 200M" }
+        - { regexp: "^date.timezone =",                 line: "date.timezone = Australia/Melbourne" }
+        - { regexp: "opcache.enable=",                  line: "opcache.enable=1" }
+        - { regexp: "opcache.interned_strings_buffer=", line: "opcache.interned_strings_buffer=8" }
+        - { regexp: "opcache.max_accelerated_files=",   line: "opcache.max_accelerated_files=10000" }
+        - { regexp: "opcache.memory_consumption=",      line: "opcache.memory_consumption=128" }
+        - { regexp: "opcache.save_comments=",           line: "opcache.save_comments=1" }
+        - { regexp: "opcache.revalidate_freq=",         line: "opcache.revalidate_freq=1" }
+
+    - name: check if nextcloud files exists
+      tags: nextcloud
+      stat:
+        path: /var/www/nextcloud
+      register: nextcloud_folder
+
+    - name: download and move nextcloud files to /var/www/nextcloud
+      unarchive:
+        src: https://download.nextcloud.com/server/releases/nextcloud-23.0.0.zip
+        dest: /var/www/
+        remote_src: yes
+        owner: www-data
+        group: www-data
+        mode: '0755'
+      when: not nextcloud_folder.stat.exists
+
+    - name: create the file /root/.nextcloud.txt
+      file:
+        path: /root/.nextcloud_.txt
+        state: touch
+        owner: root
+        group: eddie
+        mode: 0770
+
+  when: not nextcloud.stat.exists  
