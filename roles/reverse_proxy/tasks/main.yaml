@@ -76,3 +76,15 @@
     name: nginx
     state: restarted
   when: certificate.changed or certicate_update.changed
+
+- name: create a cron job to renew the certificates automatically
+  tags: reverse_proxy
+  cron:
+    name: "{{ item.name }}"
+    minute: "22"
+    hour: "{{ item.hour }}"
+    weekday: "{{ item.weekday }}"
+    job: "{{ item.command }}"
+  loop:
+    - { name: "renew certificates", command: "test certbot renew --authenticator certbot-dns-dynu:dns-dynu --certbot-dns-dynu:dns-dynu-credentials /home/eddie/.dynu-credentials.ini", weekday: "*", hour: "1" }
+    - { name: "remove old certificates", command: "rm -r /var/log/letsencrypt/*", weekday: "0", hour: "0" }
