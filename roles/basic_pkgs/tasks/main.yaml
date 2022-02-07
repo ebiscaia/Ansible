@@ -41,3 +41,11 @@
     name: [lsof,less,lsblk,util-linux]
     state: latest
   when: ansible_distribution == "Alpine"
+
+- name: add a cron job for updatedb (locate)  every 10min
+  tags: always
+  cron:
+    name: "Update database for locate"
+    minute: "*/5"
+    job: "updatedb"
+
