@@ -14,6 +14,15 @@
     create: yes
   when: ansible_cmdline['root'] == "/dev/mapper/pve-root"
 
+- name: remove proxmox subscription message
+  tags: always
+  replace:
+    path: /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
+    before: 'No valid subscription'
+    regexp: 'Ext.Msg.show'
+    replace: 'void({ //Ext.Msg.show'
+  when: ansible_cmdline['root'] == "/dev/mapper/pve-root"
+
 - name: upgrade (Ubuntu/Debian)
   tags: always
   apt:
