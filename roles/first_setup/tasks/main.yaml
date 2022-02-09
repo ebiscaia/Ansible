@@ -19,7 +19,7 @@
         state: restarted
       when:
         - timezone.changed
-        - ansible_distribution not "Rocky"
+        - not ansible_distribution == "Rocky"
 
   when: ansible_distribution in ["Ubuntu","Debian","Rocky"]
 
@@ -162,4 +162,6 @@
         state: started
         enabled: yes
 
-  when: ansible_virtualization_type == "kvm"
+  when:
+    - ansible_virtualization_type == "kvm"
+    - not ansible_cmdline['root'] == "/dev/mapper/pve-root"
