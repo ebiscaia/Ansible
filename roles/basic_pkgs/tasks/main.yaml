@@ -1,26 +1,28 @@
-- name: disable pve-enterprise repository (Proxmox)
-  tags: always
-  lineinfile:
-    path: /etc/apt/sources.list.d/pve-enterprise.list
-    regexp: 'pve-enterprise$'
-    line: '#deb https://enterprise.proxmox.com/debian/pve bullseye pve-enterprise'
-  when: ansible_cmdline['root'] == "/dev/mapper/pve-root"
+- name: Proxmox pre-update steps
+  block:
 
-- name: enable no-subscription repository (Proxmox)
-  tags: always
-  lineinfile: 
-    path: /etc/apt/sources.list
-    line: deb http://download.proxmox.com/debian/pve bullseye pve-no-subscription
-    create: yes
-  when: ansible_cmdline['root'] == "/dev/mapper/pve-root"
+    - name: disable pve-enterprise repository (Proxmox)
+      tags: always
+      lineinfile:
+        path: /etc/apt/sources.list.d/pve-enterprise.list
+        regexp: 'pve-enterprise$'
+        line: '#deb https://enterprise.proxmox.com/debian/pve bullseye pve-enterprise'
 
-- name: remove proxmox subscription message
-  tags: always
-  replace:
-    path: /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
-    before: 'No valid subscription'
-    regexp: 'Ext.Msg.show'
-    replace: 'void({ //Ext.Msg.show'
+    - name: enable no-subscription repository (Proxmox)
+      tags: always
+      lineinfile: 
+        path: /etc/apt/sources.list
+        line: deb http://download.proxmox.com/debian/pve bullseye pve-no-subscription
+        create: yes
+
+    - name: remove proxmox subscription message
+      tags: always
+      replace:
+        path: /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
+        before: 'No valid subscription'
+        regexp: '[^/]Ext.Msg.show'
+        replace: 'void({ //Ext.Msg.show'
+
   when: ansible_cmdline['root'] == "/dev/mapper/pve-root"
 
 - name: upgrade (Ubuntu/Debian)
