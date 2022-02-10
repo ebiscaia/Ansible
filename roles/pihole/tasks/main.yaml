@@ -1,0 +1,33 @@
+- name: pre-install tasks for Rocky
+  block:
+          
+    - name: disable SELinux
+      tags: pihole
+      lineinfile:
+        path: /etc/selinux/config
+        regexp: '^SELINUX='
+        line: SELINUX=disabled
+      register: selinux
+
+    - name: install binding for firewalld and python
+      tags: pihole
+      dnf:
+        name: python3-firewall
+        state: present
+
+    - name: enable traffic for http, https
+      tags: pihole
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        state: enabled
+      loop:
+        - http
+        - https
+
+    - name: reboot system to apply changes
+      tags: pihole
+      reboot:
+      when: selinux.changed
+
+  when: ansible_distribution == "Rocky"
