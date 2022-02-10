@@ -78,15 +78,23 @@
     - name: copy VirtualBox Guest Addition disc image
       copy:
         src: VBoxGuestAdditions.iso
-        dest: /home/eddie/
-        owner: eddie
-        group: eddie
+        dest: /root/
+        owner: root
+        group: root
         mode: 0777
+
+    - name: ensure the folder /media exists
+      file:
+        path: /media
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
 
     - name: mount the .iso image
       mount:
         path: /media
-        src: /home/eddie/VBoxGuestAdditions.iso
+        src: /root/VBoxGuestAdditions.iso
         fstype: iso9660
         opts: loop
         state: mounted
@@ -102,7 +110,7 @@
 
     - name: delete VirtualBox Guest Addition disc image
       file:
-        path: /home/eddie/VBoxGuestAdditions.iso
+        path: /root/VBoxGuestAdditions.iso
         state: absent
 
     - name: create /root/.vbox.txt file to confirm installation
