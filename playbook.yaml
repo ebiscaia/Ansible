@@ -91,3 +91,10 @@
   roles:
     - nextcloud
     - nextcloud_post_install
+
+- hosts: pihole
+  become: true
+  vars_files:
+    - secrets.yaml
+  roles:
+    - pihole
