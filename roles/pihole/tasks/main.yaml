@@ -31,3 +31,48 @@
       when: selinux.changed
 
   when: ansible_distribution == "Rocky"
+
+- name: check if pihole was installed
+  stat:
+    path: /etc/.pihole
+  register: pihole
+
+- name: pihole general pre-install
+  block:
+
+    - name: copy setup file
+      tags: pihole
+      copy:
+        src: setupVars.conf
+        dest: /etc/pihole/
+        owner: root
+        group: root
+        mode: 0644
+    
+    - name: alter the setup file to match the machine
+      tags: pihole
+      lineinfile:
+        path: /etc/pihole/setupVars.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - { regexp: '^PIHOLE_INTERFACE=', line: "PIHOLE_INTERFACE={{ ansible_facts['default_ipv4']['interface'] }}"}
+        - { regexp: '^IPV4_ADDRESS=',     line: "IPV4_ADDRESS={{ ansible_facts['default_ipv4']['address'] }}"}
+        - { regexp: '^IPV6_ADDRESS=',     line: "IPV6_ADDRESS={{ ansible_facts['default_ipv6']['address'] }}"}
+
+    - name: download pihole installer
+      tags: pihole
+      get_url:
+        url: https://install.pi-hole.net
+        dest: /home/eddie/basic-install.sh
+        owner: eddie
+        group: eddie
+        mode: 0775
+
+    - name: show a message asking to run the script manually on the hosts
+      debug:
+        msg: 
+          - "Pihole pre-install is finished. Please run the following script before running Ansible again"
+          - "PIHOLE_SKIP_OS_CHECK=true sudo -E bash /dev/stdin --unattended"
+
+  when: not pihole.stat.exists          
