@@ -1,0 +1,63 @@
+- name: check if pihole was installed
+  tags: pihole_post_install
+  stat:
+    path: /etc/.pihole
+  register: pihole
+  
+- name: pihole post-install
+  block:
+
+    - name: copy custom cname file
+      tags: pihole_post_install
+      copy:
+        src: 05-pihole-custom-cname.conf
+        dest: /etc/dnsmasq.d/
+        owner: root
+        group: root
+        mode: 0644
+    
+    - name: copy custom.list file
+      tags: pihole_post_install
+      copy:
+        src: custom.list
+        dest: /etc/pihole/
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: add the lists to sqlite3 database
+      tags: pihole_post_install
+      shell:
+        cmd: sqlite3 /etc/pihole/gravity.db "INSERT INTO adlist (address, enabled, comment) VALUES ('"{{ item }}"', 1, 'comment');"
+      loop: "{{ list }}"
+      ignore_errors: yes
+
+    - name: update pihole database
+      tags: pihole_post_install
+      shell:
+       cmd: "pihole -g"
+
+    - name: install unbound
+      tags: pihole_post_install
+      package:
+        name: unbound
+        state: latest
+
+    - name: copy unbound config file
+      tags: pihole_post_install
+      copy:
+        scr: unbound.txt
+        dest: /etc/unbound/unbound.conf.d/pi-hole.conf
+
+    - name: change setupVars.conf to use unbound
+      tags: pihole_post_install
+      lineinfile:
+        path: /etc/pihole/setupVars.conf
+        regex: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - { regexp: "^DNS_1=", line: "PIHOLE_DNS_1=127.0.0.1#5335" }
+        - { regexp: "^DNS_2=", line: "PIHOLE_DNS_2=" } 
+
+
+  when: pihole.stat.exists          
