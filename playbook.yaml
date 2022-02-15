@@ -98,3 +98,4 @@
     - secrets.yaml
   roles:
     - pihole
+    - pihole_post_install
