@@ -4,3 +4,4 @@
 vim: vim-enhanced
 locate: mlocate
 numlockx: mlocate #just repeating for compatibility
+unbound_dir: conf.d
