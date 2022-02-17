@@ -122,10 +122,29 @@
 
     - name: create the file /root/.nextcloud.txt
       file:
-        path: /root/.nextcloud_.txt
+        path: /root/.nextcloud.txt
         state: touch
         owner: root
         group: eddie
         mode: 0770
+
+    - name: copy the website config file
+      copy:
+        src: nextcloud.conf
+        dest: /etc/apache2/sites-available/
+        mode: 0644
+
+    - name: enable nextcloud.conf website
+      command: "{{ item }}"
+      loop:
+        - a2ensite nextcloud.conf
+        - a2dissite 000-default.conf
+      register: enable_nextcloud
+
+    - name: restart apache
+      service:
+        name: apache2
+        state: restarted
+      when: enable_nextcloud.changed
 
   when: not nextcloud.stat.exists  
