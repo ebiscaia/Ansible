@@ -7,6 +7,26 @@
 - name: pihole post-install
   block:
 
+    - name: copy setup file
+      tags: pihole
+      copy:
+        src: setupVars.conf
+        dest: /etc/pihole/
+        owner: root
+        group: root
+        mode: 0644
+ 
+    - name: alter the setup file to match the machine
+      tags: pihole
+      lineinfile:
+        path: /etc/pihole/setupVars.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - { regexp: '^PIHOLE_INTERFACE=', line: "PIHOLE_INTERFACE={{ ansible_facts['default_ipv4']['interface'] }}"}
+        - { regexp: '^IPV4_ADDRESS=',     line: "IPV4_ADDRESS={{ ansible_facts['default_ipv4']['address'] }}"}
+        - { regexp: '^IPV6_ADDRESS=',     line: "IPV6_ADDRESS={{ ansible_facts['default_ipv6']['address'] }}"}
+
     - name: copy custom cname file
       tags: pihole_post_install
       copy:
@@ -25,17 +45,33 @@
         group: root
         mode: 0644
 
-    - name: add the lists to sqlite3 database
+    - name: check if the gravity database has new items
       tags: pihole_post_install
-      shell:
-        cmd: sqlite3 /etc/pihole/gravity.db "INSERT INTO adlist (address, enabled, comment) VALUES ('"{{ item }}"', 1, 'comment');"
-      loop: "{{ list }}"
-      ignore_errors: yes
+      stat:
+        path: /root/.gravity.txt
+      register: gravity
 
-    - name: update pihole database
+    - name: update gravity database
       tags: pihole_post_install
-      shell:
-       cmd: "pihole -g"
+      block:
+                
+        - name: add the lists to sqlite3 database
+          shell:
+            cmd: sqlite3 /etc/pihole/gravity.db "INSERT INTO adlist (address, enabled, comment) VALUES ('"{{ item }}"', 1, 'comment');"
+          loop: "{{ list }}"
+          ignore_errors: yes
+
+        - name: create/touch file for checking
+          file:
+            path: /root/.gravity.txt
+            state: touch
+    
+        - name: update pihole database
+          shell:
+            cmd: "pihole -g"
+
+      when: 
+        - not gravity.stat.exists or (gravity.stat.ctime | int - ansible_facts['date_time']['epoch'] | int) > 2600000 #30 days rounded up   
 
     - name: install unbound
       tags: pihole_post_install
@@ -46,8 +82,8 @@
     - name: copy unbound config file
       tags: pihole_post_install
       copy:
-        scr: unbound.txt
-        dest: /etc/unbound/unbound.conf.d/pi-hole.conf
+        src: unbound.txt
+        dest: "/etc/unbound/{{ unbound_dir }}/pi-hole.conf"
 
     - name: change setupVars.conf to use unbound
       tags: pihole_post_install
@@ -59,5 +95,5 @@
         - { regexp: "^DNS_1=", line: "PIHOLE_DNS_1=127.0.0.1#5335" }
         - { regexp: "^DNS_2=", line: "PIHOLE_DNS_2=" } 
 
-
-  when: pihole.stat.exists          
+  when: 
+  - pihole.stat.exists
