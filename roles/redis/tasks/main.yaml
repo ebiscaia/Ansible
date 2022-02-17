@@ -1,5 +1,5 @@
 - name: install redis server
   tags: redis
   apt:
-    name: redis-server
+    name: [redis-server,php-redis]
     state: latest
