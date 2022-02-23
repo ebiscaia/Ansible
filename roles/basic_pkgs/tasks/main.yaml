@@ -49,11 +49,38 @@
 
   when: ansible_distribution == "Alpine"
 
-- name: upgrade (Rocky)
+- name: pre upgrade steps (Rocky Linux)
   tags: always
-  dnf:
-    name: "*"
-    state: latest
+  block:
+
+    - name: install Epel repository
+      dnf:
+        name: epel-release
+        state: latest
+      register: epel
+
+    - name: enable PowerTools repository
+      shell:
+        cmd: "dnf config-manager --set-enabled powertools"
+      when: epel.changed
+
+    - name: install Remi repository
+      dnf:
+        name: "http://rpms.remirepo.net/enterprise/remi-release-8.rpm"
+        state: latest
+        disable_gpg_check: yes
+      register: remi
+
+    - name: enable php 8.0
+      shell:
+        cmd: "dnf module enable php:remi-8.0 -y"
+      when: remi.changed
+
+    - name: upgrade (Rocky)
+      dnf:
+        name: "*"
+        state: latest
+
   when: ansible_distribution == "Rocky"
 
 - name: install the basic packages
