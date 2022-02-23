@@ -3,7 +3,7 @@
   package:
     update_cache: yes
 
-- name: set timezone to Australia/Melbourne (Ubuntu)
+- name: set timezone to Australia/Melbourne (Ubuntu, Debian, Rocky Linux)
   block:
     
     - name: change timezone setting
