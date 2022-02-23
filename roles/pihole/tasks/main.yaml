@@ -13,9 +13,9 @@
       tags: pihole
       dnf:
         name: python3-firewall
-        state: present
+        state: latest
 
-    - name: enable traffic for http, https
+    - name: enable traffic for necessary services on firewalld
       tags: pihole
       ansible.posix.firewalld:
         service: "{{ item }}"
@@ -24,13 +24,43 @@
       loop:
         - http
         - https
+        - dns
+        - dhcp
+        - dhcpv6
 
+    - name: create FTL firewall zone
+      tags: pihole
+      ansible.posix.firewalld:
+        zone: ftl
+        state: present
+        permanent: yes
+    - name: add network interface to FTL firewall zone
+      tags: pihole
+      ansible.posix.firewalld:
+        zone: ftl
+        interface: lo
+        permanent: yes
+        state: enabled
+
+    - name: add port 4711/tcp to FTL firewall zone
+      tags: pihole
+      ansible.posix.firewalld:
+        zone: ftl
+        port: 4711/tcp
+        permanent: yes
+        state: enabled
+        
     - name: reboot system to apply changes
       tags: pihole
       reboot:
       when: selinux.changed
 
   when: ansible_distribution == "Rocky"
+
+- name: install sqlite3 to allow adding lists to gravity.db on CLI
+  package:
+    name: "{{ sqlite }}"
+    state: latest
 
 - name: check if pihole was installed
   stat:
