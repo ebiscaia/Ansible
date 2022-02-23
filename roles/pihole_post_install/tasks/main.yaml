@@ -73,6 +73,10 @@
       when: 
         - not gravity.stat.exists or (gravity.stat.ctime | int - ansible_facts['date_time']['epoch'] | int) > 2600000 #30 days rounded up   
 
+    - name: update pihole
+      shell:
+        cmd: "pihole -up"
+
     - name: install unbound
       tags: pihole_post_install
       package:
@@ -92,8 +96,8 @@
         regex: "{{ item.regexp }}"
         line: "{{ item.line }}"
       loop:
-        - { regexp: "^DNS_1=", line: "PIHOLE_DNS_1=127.0.0.1#5335" }
-        - { regexp: "^DNS_2=", line: "PIHOLE_DNS_2=" } 
+        - { regexp: "_DNS_1=", line: "PIHOLE_DNS_1=127.0.0.1#5335" }
+        - { regexp: "_DNS_2=", line: "PIHOLE_DNS_2=" } 
 
   when: 
   - pihole.stat.exists
