@@ -5,3 +5,4 @@ vim: vim-nox
 locate: locate
 numlockx: numlockx
 unbound_dir: unbound.conf.d
+sqlite: sqlite3
