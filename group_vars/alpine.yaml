@@ -3,4 +3,5 @@
 # Packages
 vim: vim
 numlockx: vim  #dummy package to allow numlockx to be installed in other systems without the need of another package call 
-#locate: findutils-locate -> moved to inventory due to diff between 3.13 and 3.15
+locate: findutils-locate
+pip: py3-pip
