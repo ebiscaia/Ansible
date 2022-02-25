@@ -37,13 +37,6 @@
     - eddienetworks.ddnsfree.com
   register: certificate
 
-- name: restart nginx
-  tags: reverse_proxy
-  service:
-    name: nginx
-    state: restarted
-  when: certificate.changed or certicate_update.changed
-
 - name: copy dynu credentials to run certbot-dns-dynu plugin to upgrade the certicate
   tags: reverse_proxy_update
   copy:
@@ -65,17 +58,12 @@
     name: certbot-dns-dynu
     state: present
 
-- name: update the certificate using certbot-dns-dynu plugin
-  tags: reverse_proxy_update
-  command: "certbot renew --authenticator dns-dynu --dns-dynu-credentials /home/eddie/.dynu-credentials.ini --dns-dynu-propagation-seconds 90"
-  register: certicate_update
-
 - name: restart nginx
   tags: reverse_proxy_update
   service:
     name: nginx
     state: restarted
-  when: certificate.changed or certicate_update.changed
+  when: certificate.changed
 
 - name: create a cron job to renew the certificates automatically
   tags: reverse_proxy
