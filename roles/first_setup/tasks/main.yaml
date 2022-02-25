@@ -98,7 +98,8 @@
         fstype: iso9660
         opts: loop
         state: mounted
-          
+        boot: no
+
     - name: install VirtualBox Guest Additions executable file
       command: /media/VBoxLinuxAdditions.run
       ignore_errors: yes
@@ -106,7 +107,7 @@
     - name: unmount disc and remove /etc/fstab information
       mount:
         path: /media
-        state: absent
+        state: unmounted
 
     - name: delete VirtualBox Guest Addition disc image
       file:
