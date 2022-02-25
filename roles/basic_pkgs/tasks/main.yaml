@@ -33,20 +33,11 @@
     upgrade: dist
   when: ansible_distribution in ["Ubuntu", "Debian"]
 
-- name: prepare and upgrade Alpine Linux
-  block:
-
-    - name: enable edge repositories
-      tags: always
-      shell:
-        cmd: sed -i '2s/^http/#http/' /etc/apk/repositories; sed -i '4,5s/#http/http/' /etc/apk/repositories
-    
-    - name: upgrade (Alpine)
-      tags: always
-      apk:
-        update_cache: yes
-        upgrade: yes
-
+- name: upgrade (Alpine)
+  tags: always
+  apk:
+    update_cache: yes
+    upgrade: yes
   when: ansible_distribution == "Alpine"
 
 - name: pre upgrade steps (Rocky Linux)
