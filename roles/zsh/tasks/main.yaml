@@ -125,7 +125,7 @@
     block: |
       alias dnfu='sudo dnf upgrade -y'
       alias dnfi='sudo dnf install'
-      alias dnfdd='sudo dnf remove'
+      alias dnfd='sudo dnf remove'
       alias dnfs='sudo dnf search'
     insertafter: "^## END Aliases"
   when: ansible_distribution in ["Rocky"]
