@@ -96,13 +96,13 @@
     - name: add cron job for cron.php
       tags: nextcloud_post_install
       cron:
-        name: "cronj.php"
+        name: " {{ item.name }}"
         minute: "*/10"
         hour: "*"
-        job: "{{ item }}"
+        job: "{{ item.job }}"
       loop:
-        - "sudo -u www-data php -f /var/www/nextcloud/cron.php"
-        - "sudo -u www-data php /var/www/nextcloud/occ files:scan --all"
+        - { name: "cron.php", job: "sudo -u www-data php -f /var/www/nextcloud/cron.php" } 
+        - { name: "file scan", job: "sudo -u www-data php /var/www/nextcloud/occ files:scan --all" }
    
     - name: create the file /root/.nextcloud_post_install.txt
       file:
