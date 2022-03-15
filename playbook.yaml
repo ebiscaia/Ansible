@@ -1,5 +1,7 @@
 ---
 
+
+# This is a comment added in the rebase branch
 # This is a comment added in the main branch
 - hosts: all
   become: true
