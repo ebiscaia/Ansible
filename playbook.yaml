@@ -1,6 +1,6 @@
 ---
 
-# change for git rebase
+# This is a comment added in the rebase branch
 - hosts: all
   become: true
   roles:
