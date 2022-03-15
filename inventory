@@ -9,6 +9,7 @@
 192.168.1.153
 192.168.1.240 'ansible_python_interpreter=/usr/bin/python3'
 192.168.1.241
+192.168.1.110
 
 [singleuser]
 192.168.1.101
@@ -21,6 +22,7 @@
 
 [multiuser]
 192.168.1.141
+192.168.1.110
 
 [ubuntu]
 192.168.1.241
@@ -33,7 +35,7 @@
 proxmox
 
 [alpine]
-192.168.1.249 locate=findutils-locate pip=py3-pip
+192.168.1.249
 
 [rocky]
 192.168.1.141
