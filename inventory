@@ -33,7 +33,7 @@
 proxmox
 
 [alpine]
-192.168.1.249 locate=findutils-locate pip=py3-pip
+192.168.1.249
 
 [rocky]
 192.168.1.141
