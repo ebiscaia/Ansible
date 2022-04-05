@@ -19,9 +19,9 @@
         state: restarted
       when:
         - timezone.changed
-        - not ansible_distribution == "Rocky"
+        - not ansible_distribution == ["Rocky","Fedora"]
 
-  when: ansible_distribution in ["Ubuntu","Debian","Rocky"]
+  when: ansible_distribution in ["Ubuntu","Debian","Rocky","Fedora"]
 
 - name: set timezone to Australia/Melbourne install tzdata package
   block: 
@@ -64,7 +64,7 @@
 
   when:
     - ansible_virtualization_type == "virtualbox"
-    - ansible_distribution in ["Ubuntu","Debian","Rocky"]
+    - ansible_distribution in ["Ubuntu","Debian","Rocky","Fedora"]
 
 - name: install VirtualBox Guest Additions (Ubuntu/Debian/Rocky)
   tags: always
@@ -126,17 +126,17 @@
 
   when: 
     - ansible_virtualization_type == "virtualbox"
-    - ansible_distribution in ["Ubuntu","Debian","Rocky"]
+    - ansible_distribution in ["Ubuntu","Debian","Rocky","Fedora"]
     - not vbox.stat.exists
 
-- name: enable edge repositories
-  tags: always
-  shell:
-    cmd: sed -i '2s/^http/#http/' /etc/apk/repositories; sed -i '4,5s/#http/http/' /etc/apk/repositories
 
 - name: install VirtualBox Guest Additions (Alpine)
   tags: always
   block:
+
+    - name: enable edge repositories
+      shell:
+        cmd: sed -i '2s/^http/#http/' /etc/apk/repositories; sed -i '4,5s/#http/http/' /etc/apk/repositories
 
     - name: install virtualbox-guest-additions package
       apk:

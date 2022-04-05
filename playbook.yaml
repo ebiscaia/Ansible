@@ -1,21 +1,5 @@
 ---
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
-# This is a comment added in the rebase branch
->>>>>>> 0652a7650d5a9b38db7965f2d139d3901791809d
-=======
-
-# This is a comment added in the rebase branch
->>>>>>> 0652a7650d5a9b38db7965f2d139d3901791809d
-# This is a comment added in the main branch
-# change for git rebase
-=======
-# This is a comment added in the rebase branch
->>>>>>> 4eccdcf... Changed the comment
 - hosts: all
   become: true
   roles:
