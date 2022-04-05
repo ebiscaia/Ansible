@@ -11,6 +11,7 @@
 192.168.1.240 'ansible_python_interpreter=/usr/bin/python3'
 192.168.1.241
 192.168.1.110
+192.168.1.113
 
 [singleuser]
 192.168.1.101
@@ -42,6 +43,9 @@ proxmox
 [rocky]
 192.168.1.141
 192.168.1.240
+
+[fedora]
+192.168.1.113
 
 [raspberry_01]
 192.168.1.101
