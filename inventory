@@ -5,7 +5,7 @@
 
 [clients]
 192.168.1.101 
-192.168.1.249
+eddienetworks.ddnsfree.com 'ansible_port=2249'
 192.168.1.151
 192.168.1.153
 192.168.1.240 'ansible_python_interpreter=/usr/bin/python3'
@@ -17,7 +17,7 @@
 192.168.1.101
 192.168.1.241
 192.168.1.140
-192.168.1.249
+eddienetworks.ddnsfree.com 'ansible_port=2249'
 192.168.1.151
 192.168.1.153
 192.168.1.240
@@ -38,7 +38,7 @@
 proxmox
 
 [alpine]
-192.168.1.249
+eddienetworks.ddnsfree.com 'ansible_port=2249'
 
 [rocky]
 192.168.1.141
@@ -69,7 +69,7 @@ nextcloud
 reverse_proxy
 
 [reverse_proxy]
-192.168.1.249
+eddienetworks.ddnsfree.com 'ansible_port=2249'
 
 [PHP:children]
 nextcloud
