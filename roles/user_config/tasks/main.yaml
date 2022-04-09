@@ -11,7 +11,7 @@
   tags: ranger
   copy:
     src: rc.conf
-    dest: "/home/{{ item.name }}/.config/rc.conf"
+    dest: "/home/{{ item.name }}/.config/ranger/rc.conf"
     owner: "{{ item.name }}"
     mode: 0664
   loop: "{{ users }}"
