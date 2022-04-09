@@ -84,5 +84,5 @@
     weekday: "{{ item.weekday }}"
     job: "{{ item.command }}"
   loop:
-    - { name: "renew certificates", command: "test certbot renew --authenticator certbot-dns-dynu:dns-dynu --certbot-dns-dynu:dns-dynu-credentials /home/eddie/.dynu-credentials.ini", weekday: "*", hour: "1" }
+    - { name: "renew certificates", command: "certbot renew --authenticator dns-dynu --dns-dynu-credentials /home/eddie/.dynu-credentials.ini --dns-dynu-propagation-seconds 240", weekday: "*", hour: "1" }
     - { name: "remove old certificates", command: "rm -r /var/log/letsencrypt/*", weekday: "0", hour: "0" }
