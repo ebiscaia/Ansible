@@ -29,6 +29,16 @@
     owner: root
     group: root
 
+- name: create symlinks for the keys
+  file:
+    src: "/etc/letsencrypt/archive/{{ item.0 }}/{{ item.1 }}1.pem"
+    dest: "/etc/letsencrypt/live/{{ item.0 }}/{{ item.1 }}.pem"
+    state: link
+    owner: root
+    group: root
+    mode: 0777
+  loop: "{{ ['anotherlinuxuser.ddnsfree.com', 'anotherlinuxuser.ddnsfree.com-0001', 'eddienetworks.ddnsfree.com', 'eddienetworks.ddnsfree.com-0001']|product(['cert','privkey','fullchain','chain'])|list }}"
+
 - name: create and install certificate using certbot --nginx plugin
   tags: reverse_proxy
   command: "certbot --nginx -d {{ item }} -m ebiscaia@me.com --agree-tos --noninteractive --redirect"
