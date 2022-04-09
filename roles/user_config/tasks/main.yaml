@@ -6,3 +6,12 @@
     owner: "{{ item.name }}"
     mode: 0664
   loop: "{{ users }}"
+
+- name: copy ranger configuration file
+  tags: always
+  copy:
+    src: rc.conf
+    dest: "/home/{{ item.name }}/.config/rc.conf"
+    owner: "{{ item.name }}"
+    mode: 0664
+  loop: "{{ users }}"
