@@ -8,7 +8,7 @@
   loop: "{{ users }}"
 
 - name: copy ranger configuration file
-  tags: always
+  tags: ranger
   copy:
     src: rc.conf
     dest: "/home/{{ item.name }}/.config/rc.conf"
