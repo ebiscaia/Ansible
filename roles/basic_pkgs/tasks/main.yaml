@@ -32,6 +32,7 @@
     cache_valid_time: 18000
     upgrade: dist
   when: ansible_distribution in ["Ubuntu", "Debian"]
+  register: upgrade
 
 - name: upgrade (Alpine)
   tags: always
@@ -87,36 +88,18 @@
     state: latest
   when: ansible_distribution == "Alpine"
 
-- name: add a cron job for updatedb (locate)  every 10min
+- name: add a cron job for updatedb (locate) every 10min
   tags: always
   cron:
     name: "Update database for locate"
     minute: "*/5"
     job: "updatedb"
 
-- name: check if dark mode is enabled
+- name: install dark mode for Proxmox
   tags: always
-  stat:
-    path: /root/.dark_mode_enabled.txt
-  register: dark_mode
-
-- name: verify and install dark mode for Proxmox
-  block:
-
-    - name: install dark mode for Proxmox
-      tags: always
-      shell:
-        cmd: bash <(curl -s https://raw.githubusercontent.com/Weilbyte/PVEDiscordDark/master/PVEDiscordDark.sh ) install
-        executable: /bin/bash
-      register: dark_mode_enabled
-
-    - name: create dark_mode_enabled file
-      tags: always
-      file:
-        path: /root/.dark_mode_enabled.txt
-        state: touch
-      when: dark_mode_enabled.changed
-
+  shell:
+    cmd: bash <(curl -s https://raw.githubusercontent.com/Weilbyte/PVEDiscordDark/master/PVEDiscordDark.sh ) install
+    executable: /bin/bash
   when: 
     - ansible_cmdline['root'] == "/dev/mapper/pve-root"
-    - not dark_mode.stat.exists
+    - upgrade.changed
