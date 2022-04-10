@@ -69,7 +69,7 @@ nextcloud
 reverse_proxy
 
 [reverse_proxy]
-eddienetworks.ddnsfree.com 'ansible_port=2249'
+eddienetworkstest.ddnsfree.com 'ansible_port=2249'
 
 [PHP:children]
 nextcloud
