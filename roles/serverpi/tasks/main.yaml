@@ -19,12 +19,12 @@
     opts: nosuid,nodev,nofail,x-gvfs-show
     state: mounted
   loop:
-  #- { folder: 'Backup', uuid: '05d1a142-de8d-4466-9ecc-aa7e8a8dd159' }
-  #- { folder: 'Music', uuid: '70a57bc7-1e2b-455e-b74a-4058a47bfae4' }
-  #- { folder: 'Photos', uuid: '2051dc1b-080d-4256-bb6e-e3b9f961766c' }
-  - { folder: 'Backup', uuid: '260b0f38-da2c-4892-858e-7b596208f5d6' }
-  - { folder: 'Music', uuid: 'BA10-1807' }
-  - { folder: 'Photos', uuid: '231e6aa0-285b-4f32-bf84-d45d5baf4626' }
+  - { folder: 'Backup', uuid: '05d1a142-de8d-4466-9ecc-aa7e8a8dd159' }
+  - { folder: 'Music', uuid: '70a57bc7-1e2b-455e-b74a-4058a47bfae4' }
+  - { folder: 'Photos', uuid: '2051dc1b-080d-4256-bb6e-e3b9f961766c' }
+  #- { folder: 'Backup', uuid: '260b0f38-da2c-4892-858e-7b596208f5d6' }
+  #- { folder: 'Music', uuid: 'BA10-1807' }
+  #- { folder: 'Photos', uuid: '231e6aa0-285b-4f32-bf84-d45d5baf4626' }
                                                                                                                                                             
 - name: add samba shares to smb.conf
   blockinfile:
