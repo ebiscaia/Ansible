@@ -3,7 +3,7 @@
 - hosts: all
   become: true
   roles:
-    - basic_pkgs
+   - basic_pkgs
 
 - hosts: all
   become: true
@@ -14,7 +14,7 @@
   become: true
   roles:
     - zsh
-      
+
 - hosts: file_servers
   become: true
   roles:
