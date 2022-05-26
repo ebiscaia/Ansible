@@ -80,7 +80,7 @@
 - name: install the basic packages
   tags: always
   package:
-    name: [htop,ripgrep,neofetch,tree,zsh,ranger,unzip,git,"{{ vim }}",speedtest-cli,wget,curl,tmux,rsync,"{{ locate }}","{{ numlockx }}"]
+    name: [htop,ripgrep,tar,neofetch,tree,zsh,ranger,unzip,git,"{{ vim }}",speedtest-cli,wget,curl,tmux,rsync,"{{ locate }}","{{ numlockx }}"]
     state: latest
 
 - name: install more basic packages for Alpine
