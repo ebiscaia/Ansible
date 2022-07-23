@@ -75,7 +75,7 @@
         name: "*"
         state: latest
 
-  when: ansible_distribution == "Rocky"
+  when: ansible_distribution == ["Rocky","Fedora"]
 
 - name: install the basic packages
   tags: always
