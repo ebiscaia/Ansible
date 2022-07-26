@@ -95,7 +95,7 @@
   tags: zsh
   blockinfile:
     path: /home/ansible/.zshrc
-    marker: "## {mark} Apt aliases ##"
+    marker: "## {mark} Apt custom aliases ##"
     block: |
       alias aptu='sudo apt update; sudo apt upgrade -y; sudo apt autopurge -y'
       alias apti='sudo apt update; sudo apt install'
@@ -108,7 +108,7 @@
   tags: zsh
   blockinfile:
     path: /home/ansible/.zshrc
-    marker: "## {mark} Apk aliases ##"
+    marker: "## {mark} Apk custom aliases ##"
     block: |
       alias apku='sudo apk -U upgrade'
       alias apki='sudo apt add'
@@ -121,7 +121,7 @@
   tags: zsh
   blockinfile:
     path: /home/ansible/.zshrc
-    marker: "## {mark} Dnf aliases ##"
+    marker: "## {mark} Dnf custom aliases ##"
     block: |
       alias dnfu='sudo dnf upgrade -y'
       alias dnfi='sudo dnf install'
@@ -129,6 +129,16 @@
       alias dnfs='sudo dnf search'
     insertafter: "^## END Aliases"
   when: ansible_distribution in ["Rocky"]
+
+- name: insert fzf commands
+  tags: zsh,fzf
+  blockinfile:
+    path: /home/ansible/.zshrc
+    marker: "## {mark} FZF options##"
+    block: |
+      [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+      export FZF_DEFAULT_OPS="--extended"
+    insertafter: "custom aliases##$"
 
 - name: insert alias for python3
   tags: zsh

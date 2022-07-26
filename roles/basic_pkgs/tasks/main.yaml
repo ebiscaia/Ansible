@@ -105,3 +105,73 @@
   when: 
     - ansible_cmdline['root'] == "/dev/mapper/pve-root"
     - upgrade.changed
+<<<<<<< Updated upstream
+=======
+  ignore_errors: true
+
+    #- name: delete fzf folder
+    #  file:
+    #    path: "{{ item }}"
+    #    state: absent
+    #  tags: fzf
+    #  loop:
+    #    - .fzf
+    #    - .fzf.bash
+    #    - .fzf.zsh
+    #    - /home/ansible/.fzf
+    #    - /home/ansible/.fzf.bash
+    #    - /home/ansible/.fzf.zsh
+    #  ignore_errors: true
+
+- name: change .fzf folder owner
+  tags: fzf
+  file:
+    path: /home/ansible/.fzf
+    owner: root
+    group: root
+    recurse: yes
+  ignore_errors: true
+
+- name: clone fzf repository
+  tags: fzf
+  git:
+    repo: https://github.com/junegunn/fzf.git
+    dest: .fzf
+    update: yes
+  register: fzf
+
+- name: change .fzf folder owner
+  tags: fzf
+  file:
+    path: /home/ansible/.fzf
+    owner: ansible
+    group: ansible
+    recurse: yes
+
+- name: install fzf if new version is available
+  tags: fzf
+  block:  
+
+  - name: run fzf installer script
+    shell:
+      cmd: runuser -l ansible -c "echo 'y'| .fzf/install"
+  
+  - name: copy .fzf folder and bash and zsh extensions to user folder
+    copy:
+      src: "{{ item.1 }}"
+      dest: "/home/{{ item.0.name }}/"
+      remote_src: yes
+      owner: "{{ item.0.name }}"
+      group: "{{ item.0.name }}"
+      mode: preserve
+    loop: "{{ users | product(['.fzf','.fzf.bash','.fzf.zsh']) | list }}" 
+  
+  - name: change .fzf.bash and .fzf.zsh extensions to match users
+    replace:
+      path: "/home/{{ item.0.name }}/{{ item.1 }}"
+      regexp: 'ansible'
+      replace: "{{ item.0.name }}"
+    loop: "{{ users | product(['.fzf.bash','.fzf.zsh']) | list }}" 
+
+  when: fzf.changed
+>>>>>>> Stashed changes
