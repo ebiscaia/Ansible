@@ -3,3 +3,10 @@
   package:
     name: nginx
     state: latest
+
+- name: start nginx
+  tags: nginx,reverse_proxy
+  service:
+    name: nginx
+    state: started
+    enabled: true
