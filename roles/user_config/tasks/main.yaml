@@ -7,6 +7,14 @@
     mode: 0664
   loop: "{{ users }}"
 
+- name: create a ".config/ranger" folder
+  file:
+    state: directory
+    path: "/home/{{ item.name }}/.config/ranger"
+    owner: "{{ item.name }}"
+    mode: 0644
+  loop: "{{ users }}"
+
 - name: copy ranger configuration file
   tags: ranger
   copy:
