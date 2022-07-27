@@ -1,6 +1,6 @@
 - name: install ddclient
   tags: ddclient
-  apt:
+  package:
     name: ddclient
     state: latest
 
