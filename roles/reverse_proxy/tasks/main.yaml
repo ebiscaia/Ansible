@@ -3,9 +3,19 @@
   tags: reverse_proxy
   git:
     repo: https://github.com/ebiscaia/reverse_proxy.git
-    dest: /home/eddie/reverse_proxy
+    dest: /root/reverse_proxy
     force: yes
 
+- name: copy repo to eddie folder
+  tags: reverse_proxy
+  copy:
+    remote_src: true
+    src: /root/reverse_proxy
+    dest: /home/eddie/
+    owner: eddie
+    group: eddie
+    mode: 0770
+    
 - name: mount bind folder with /etc/nginx/http.d
   tags: reverse_proxy
   mount:
