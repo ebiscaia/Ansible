@@ -12,8 +12,20 @@
     owner: root
     group: root
     mode: 0600
+  when: ansible_distribution == "Ubuntu"
   register: ddclient_config
 
+- name: copy ddclient config file
+  tags: ddclient
+  copy:
+    src: ddclient
+    dest: /etc/ddclient/ddclient.conf
+    owner: root
+    group: root
+    mode: 0600
+  when: ansible_distribution == "Alpine"
+
+  register: ddclient_config
 - name: restart ddclient
   tags: ddclient
   service:
