@@ -70,12 +70,14 @@
 
     - name: install ripgrep repository
       command: "sudo dnf config-manager --add-repo https://copr.fedorainfracloud.org/coprs/carlwgeorge/ripgrep/repo/epel-7/carlwgeorge-ripgrep-epel-7.repo"
-    - name: upgrade (Rocky)
-      dnf:
-        name: "*"
-        state: latest
 
-  when: ansible_distribution == ["Rocky","Fedora"]
+  when: ansible_distribution in ["Rocky"]
+
+- name: upgrade (Rocky, Fedora)
+  tags: always
+  shell:
+    cmd: 'dnf --refresh update -y'
+  when: ansible_distribution in ["Rocky", "Fedora"]
 
 - name: install the basic packages
   tags: always
