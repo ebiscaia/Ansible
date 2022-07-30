@@ -3,7 +3,7 @@
   package:
     update_cache: yes
 
-- name: set timezone to Australia/Melbourne (Ubuntu, Debian, Rocky Linux)
+- name: set timezone to Australia/Melbourne (Ubuntu, Debian, Rocky Linux, Fedora)
   block:
     
     - name: change timezone setting
@@ -19,7 +19,7 @@
         state: restarted
       when:
         - timezone.changed
-        - not ansible_distribution == ["Rocky","Fedora"]
+        - not ansible_distribution in ["Rocky","Fedora"]
 
   when: ansible_distribution in ["Ubuntu","Debian","Rocky","Fedora"]
 
