@@ -1,5 +1,5 @@
 - name: copy tmux configuration file
-  tags: always
+  tags: config
   copy:
     src: tmux.conf
     dest: "/home/{{ item.name }}/.tmux.conf"
@@ -8,6 +8,7 @@
   loop: "{{ users }}"
 
 - name: create a ".config/ranger" folder
+  tags: config
   file:
     state: directory
     path: "/home/{{ item.name }}/.config/ranger"
@@ -16,7 +17,7 @@
   loop: "{{ users }}"
 
 - name: copy ranger configuration file
-  tags: ranger
+  tags: config
   copy:
     src: rc.conf
     dest: "/home/{{ item.name }}/.config/ranger/rc.conf"

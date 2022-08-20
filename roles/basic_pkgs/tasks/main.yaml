@@ -2,21 +2,21 @@
   block:
 
     - name: disable pve-enterprise repository (Proxmox)
-      tags: always
+      tags: proxmox
       lineinfile:
         path: /etc/apt/sources.list.d/pve-enterprise.list
         regexp: 'pve-enterprise$'
         line: '#deb https://enterprise.proxmox.com/debian/pve bullseye pve-enterprise'
 
     - name: enable no-subscription repository (Proxmox)
-      tags: always
+      tags: proxmox
       lineinfile: 
         path: /etc/apt/sources.list
         line: deb http://download.proxmox.com/debian/pve bullseye pve-no-subscription
         create: yes
 
     - name: remove proxmox subscription message
-      tags: always
+      tags: proxmox
       replace:
         path: /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
         before: 'No valid subscription'
@@ -28,7 +28,7 @@
     - ansible_distribution == 'Debian'
 
 - name: upgrade (Ubuntu/Debian)
-  tags: always
+  tags: upgrade
   apt:
     update_cache: yes
     cache_valid_time: 18000
@@ -37,14 +37,14 @@
   register: upgrade
 
 - name: upgrade (Alpine)
-  tags: always
+  tags: upgrade
   apk:
     update_cache: yes
     upgrade: yes
   when: ansible_distribution == "Alpine"
 
 - name: pre upgrade steps (Rocky Linux)
-  tags: always
+  tags: upgrade
   block:
 
     - name: install Epel repository
@@ -76,33 +76,33 @@
   when: ansible_distribution in ["Rocky"]
 
 - name: upgrade (Rocky, Fedora)
-  tags: always
+  tags: upgrade
   shell:
     cmd: 'dnf --refresh update -y'
   when: ansible_distribution in ["Rocky", "Fedora"]
 
 - name: install the basic packages
-  tags: always
+  tags: install
   package:
-    name: [htop,ripgrep,tar,neofetch,tree,zsh,ranger,unzip,git,"{{ vim }}",speedtest-cli,wget,curl,tmux,rsync,"{{ locate }}","{{ numlockx }}"]
-    state: latest
+    name: [htop,ripgrep,tar,neofetch,tree,zsh,ranger,unzip,git,speedtest-cli,wget,curl,tmux,rsync,"{{ locate }}","{{ numlockx }}"]
+    state: install
 
 - name: install more basic packages for Alpine
-  tags: always
+  tags: install
   apk:
     name: [lsof,less,lsblk,util-linux]
     state: latest
   when: ansible_distribution == "Alpine"
 
 - name: add a cron job for updatedb (locate) every 10min
-  tags: always
+  tags: install
   cron:
     name: "Update database for locate"
     minute: "*/5"
     job: "updatedb"
 
 - name: install dark mode for Proxmox
-  tags: always
+  tags: upgrade
   shell:
     cmd: bash <(curl -s https://raw.githubusercontent.com/Weilbyte/PVEDiscordDark/master/PVEDiscordDark.sh ) install
     executable: /bin/bash
