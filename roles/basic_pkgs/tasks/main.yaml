@@ -23,7 +23,9 @@
         regexp: '[^/]Ext.Msg.show'
         replace: 'void({ //Ext.Msg.show'
 
-  when: ansible_cmdline['root'] == "/dev/mapper/pve-root"
+  when: 
+    - ansible_cmdline['root'] == "/dev/mapper/pve-root"
+    - ansible_distribution == 'Debian'
 
 - name: upgrade (Ubuntu/Debian)
   tags: always
