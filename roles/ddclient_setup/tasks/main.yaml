@@ -1,8 +1,24 @@
+- name: uncomment testing repo
+  tags: ddclient,upgrade
+  replace:                                                                                      
+    path: /etc/apk/repositories
+    regexp: '^#(.*testing$)'
+    replace: '\1'
+  when: ansible_distribution == "Alpine"
+
 - name: install ddclient
-  tags: ddclient
+  tags: ddclienti,upgrade
   package:
     name: ddclient
     state: latest
+
+- name: comment testing repo
+  tags: ddclient,upgrade
+  replace:                                                                                      
+    path: /etc/apk/repositories
+    regexp: '(.*testing$)'
+    replace: '#\1'
+  when: ansible_distribution == "Alpine"
 
 - name: copy ddclient config file
   tags: ddclient
