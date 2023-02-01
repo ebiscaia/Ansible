@@ -47,7 +47,7 @@
     owner: root
     group: root
     mode: 0777
-  loop: "{{ ['anotherlinuxuser.ddnsfree.com', 'anotherlinuxuser.ddnsfree.com-0001', 'eddienetworks.ddnsfree.com', 'eddienetworks.ddnsfree.com-0001']|product(['cert','privkey','fullchain','chain'])|list }}"
+  loop: "{{ ['anotherlinuxuser.ddnsfree.com', 'anotherlinuxuser.ddnsfree.com-0001', 'eddienetworks.ddnsfree.com', 'eddienetworks.ddnsfree.com-0001'] | product(['cert', 'privkey', 'fullchain', 'chain']) | list }}"
 
 - name: create and install certificate using certbot --nginx plugin
   tags: reverse_proxy
