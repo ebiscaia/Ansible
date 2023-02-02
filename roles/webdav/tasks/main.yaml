@@ -1,6 +1,6 @@
 - name: enable dav and dav_fs apache modules
   community.general.apache2_module:
-    name: "{{ item }}"
+    name: '{{ item }}'
     state: present
   loop:
     - dav_fs
@@ -22,7 +22,7 @@
     state: mounted
     fstype: none
 
-- name : copy apache config file for webdav
+- name: copy apache config file for webdav
   copy:
     src: webdav.conf
     dest: /etc/apache2/sites-available
@@ -38,14 +38,14 @@
 
 - name: disable default config
   file:
-   path: /etc/apache2/sites-enabled/000-default.conf
-   state: absent
+    path: /etc/apache2/sites-enabled/000-default.conf
+    state: absent
 
 - name: Create a user to a file
   community.general.htpasswd:
     path: /mnt/Backup/.webdav/passwd.dav
     name: eddie
-    password: "{{ webdav }}"
+    password: '{{ webdav }}'
     owner: root
     group: www-data
     mode: 0640
