@@ -6,14 +6,14 @@
 - name: create folders for the website
   tags: anu,website
   file:
-    path: "{{ item.folder }}/another_linux_user"
+    path: '{{ item.folder }}/another_linux_user'
     state: directory
-    owner: "{{ item.owner }}"
-    group: "{{ item.group }}"
+    owner: '{{ item.owner }}'
+    group: '{{ item.group }}'
     mode: 0755
   loop:
-    - {folder: '/mnt/Backup/Windows', owner: 'eddie',    group: 'eddie' }
-    - {folder: '/var/www',            owner: 'www-data', group: 'www-data' }
+    - { folder: '/mnt/Backup/Windows', owner: 'eddie', group: 'eddie' }
+    - { folder: '/var/www', owner: 'www-data', group: 'www-data' }
 
 - name: mount bind folder in external drive with /var/www/another_linux_user
   tags: anu,website
@@ -24,7 +24,7 @@
     state: mounted
     fstype: none
 
-- name : copy apache config file for the website
+- name: copy apache config file for the website
   tags: anu,website
   copy:
     src: another_linux_user
