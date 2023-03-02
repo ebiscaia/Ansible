@@ -82,7 +82,8 @@
   tags: install
   package:
     name: [htop,ripgrep,tar,neofetch,tree,zsh,ranger,unzip,git,speedtest-cli,wget,curl,tmux,rsync,"{{ locate }}","{{ numlockx }}"]
-    state: install
+    state: latest
+
 
 - name: install more basic packages for Alpine
   tags: install
