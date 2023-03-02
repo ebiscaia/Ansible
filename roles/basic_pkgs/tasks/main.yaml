@@ -33,7 +33,7 @@
     update_cache: yes
     cache_valid_time: 18000
     upgrade: dist
-  when: ansible_distribution in ["Ubuntu", "Debian"]
+  when: ansible_distribution in ["Ubuntu", "Debian","Zorin OS"]
   register: upgrade
 
 - name: upgrade (Alpine)
