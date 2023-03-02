@@ -1,3 +1,4 @@
+# vim:ft=yaml.ansible
 - name: update the repository cache
   tags: always
   package:
@@ -5,7 +6,6 @@
 
 - name: set timezone to Australia/Melbourne (Ubuntu, Debian, Rocky Linux, Fedora)
   block:
-    
     - name: change timezone setting
       tags: always
       timezone:
@@ -24,18 +24,17 @@
   when: ansible_distribution in ["Ubuntu","Debian","Rocky","Fedora"]
 
 - name: set timezone to Australia/Melbourne install tzdata package
-  block: 
-  
+  block:
     - name: install tzdata package
       tags: always
       apk:
         name: tzdata
         state: latest
-  
-    - name: copy the file with the timezone info 
+
+    - name: copy the file with the timezone info
       tags: always
       copy:
-        src: "/usr/share/zoneinfo/{{ item.region }}/{{ item.subregion }}"
+        src: '/usr/share/zoneinfo/{{ item.region }}/{{ item.subregion }}'
         dest: /etc/localtime
         remote_src: yes
       loop:
@@ -46,7 +45,6 @@
 - name: check if VirtualBox Guest Additions (Ubuntu) is installed
   tags: always
   block:
-
     - name: check if /root/.vbox.txt is present
       stat:
         path: /root/.vbox.txt
@@ -54,12 +52,12 @@
 
     - name: display a message saying VirtualBox Guest Additions will be installed
       debug:
-        msg: "VirtualBox Guest Additions needs to be installed. That will take a while"
+        msg: 'VirtualBox Guest Additions needs to be installed. That will take a while'
       when: not vbox.stat.exists
 
     - name: display a message saying VirtualBox Guest Additions won't be installed
       debug:
-        msg: "VirtualBox Guest Additions does not need to be installed. Skipping process"
+        msg: 'VirtualBox Guest Additions does not need to be installed. Skipping process'
       when: vbox.stat.exists
 
   when:
@@ -69,10 +67,9 @@
 - name: install VirtualBox Guest Additions (Ubuntu/Debian/Rocky)
   tags: always
   block:
-
     - name: install requirement packages
       package:
-        name: [gcc,make,bzip2]
+        name: [gcc, make, bzip2]
         state: latest
 
     - name: copy VirtualBox Guest Addition disc image
@@ -124,7 +121,7 @@
     - name: reboot machine to load the kernel modules
       reboot:
 
-  when: 
+  when:
     - ansible_virtualization_type == "virtualbox"
     - ansible_distribution in ["Ubuntu","Debian","Rocky","Fedora"]
     - not vbox.stat.exists
@@ -146,8 +143,8 @@
         state: latest
 
     - name: enable modules
-      shell: 
-        cmd: "echo {{ item }} >> /etc/modules" 
+      shell:
+        cmd: 'echo {{ item }} >> /etc/modules'
       loop:
         - vboxdrv
         - vboxnetflt
@@ -159,7 +156,7 @@
         state: started
         enabled: yes
 
-  when: 
+  when:
     - ansible_virtualization_type == "virtualbox"
     - ansible_distribution == "Alpine"
 
