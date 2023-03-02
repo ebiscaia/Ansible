@@ -70,9 +70,6 @@
         cmd: "dnf module enable php:remi-8.0 -y"
       when: remi.changed
 
-    - name: install ripgrep repository
-      command: "sudo dnf config-manager --add-repo https://copr.fedorainfracloud.org/coprs/carlwgeorge/ripgrep/repo/epel-7/carlwgeorge-ripgrep-epel-7.repo"
-
   when: ansible_distribution in ["Rocky"]
 
 - name: upgrade (Rocky, Fedora)
