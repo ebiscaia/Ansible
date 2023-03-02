@@ -84,6 +84,18 @@
     name: [htop,ripgrep,tar,neofetch,tree,zsh,ranger,unzip,git,speedtest-cli,wget,curl,tmux,rsync,"{{ locate }}","{{ numlockx }}"]
     state: latest
 
+- name: install fzf package
+  tags: install
+  package:
+    name: fzf
+    state: present
+  when: ansible_distribution != "Rocky"
+
+- name: Install fzf package
+  tags: install
+  command: 
+    cmd: dnf install https://kojipkgs.fedoraproject.org//packages/fzf/0.35.1/2.fc38/x86_64/fzf-0.35.1-2.fc38.x86_64.rpm -y
+  when: ansible_distribution == "Rocky"
 
 - name: install more basic packages for Alpine
   tags: install
