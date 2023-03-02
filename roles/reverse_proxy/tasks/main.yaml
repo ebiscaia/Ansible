@@ -1,4 +1,3 @@
-
 - name: clone reverse-proxy git repository
   tags: reverse_proxy
   git:
@@ -15,7 +14,7 @@
     owner: eddie
     group: eddie
     mode: 0770
-    
+
 - name: mount bind folder with /etc/nginx/http.d
   tags: reverse_proxy
   mount:
@@ -41,8 +40,8 @@
 
 - name: create symlinks for the keys
   file:
-    src: "/etc/letsencrypt/archive/{{ item.0 }}/{{ item.1 }}1.pem"
-    dest: "/etc/letsencrypt/live/{{ item.0 }}/{{ item.1 }}.pem"
+    src: '/etc/letsencrypt/archive/{{ item.0 }}/{{ item.1 }}1.pem'
+    dest: '/etc/letsencrypt/live/{{ item.0 }}/{{ item.1 }}.pem'
     state: link
     owner: root
     group: root
@@ -51,7 +50,7 @@
 
 - name: create and install certificate using certbot --nginx plugin
   tags: reverse_proxy
-  command: "certbot --nginx -d {{ item }} -m ebiscaia@me.com --agree-tos --noninteractive --redirect"
+  command: 'certbot --nginx -d {{ item }} -m ebiscaia@me.com --agree-tos --noninteractive --redirect'
   loop:
     - anotherlinuxuser.ddnsfree.com
     - eddienetworks.ddnsfree.com
@@ -69,7 +68,7 @@
 - name: install python3-pip package (necessary to install certbot-dns-dynu plugin)
   tags: reverse_proxy_update
   package:
-    name: "{{ pip }}"
+    name: '{{ pip }}'
     state: latest
 
 - name: install certbot-dns-dynu plugin using python3-pip
@@ -88,11 +87,11 @@
 - name: create a cron job to renew the certificates automatically
   tags: reverse_proxy
   cron:
-    name: "{{ item.name }}"
-    minute: "22"
-    hour: "{{ item.hour }}"
-    weekday: "{{ item.weekday }}"
-    job: "{{ item.command }}"
+    name: '{{ item.name }}'
+    minute: '22'
+    hour: '{{ item.hour }}'
+    weekday: '{{ item.weekday }}'
+    job: '{{ item.command }}'
   loop:
-    - { name: "renew certificates", command: "certbot renew --authenticator dns-dynu --dns-dynu-credentials /home/eddie/.dynu-credentials.ini --dns-dynu-propagation-seconds 240", weekday: "*", hour: "1" }
-    - { name: "remove old certificates", command: "rm -r /var/log/letsencrypt/*", weekday: "0", hour: "0" }
+    - { name: 'renew certificates', command: 'certbot renew --authenticator dns-dynu --dns-dynu-credentials /home/eddie/.dynu-credentials.ini --dns-dynu-propagation-seconds 240', weekday: '*', hour: '1' }
+    - { name: 'remove old certificates', command: 'rm -r /var/log/letsencrypt/*', weekday: '0', hour: '0' }

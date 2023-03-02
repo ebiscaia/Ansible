@@ -33,7 +33,7 @@
     update_cache: yes
     cache_valid_time: 18000
     upgrade: dist
-  when: ansible_distribution in ["Ubuntu", "Debian"]
+  when: ansible_distribution in ["Ubuntu", "Debian","Zorin OS"]
   register: upgrade
 
 - name: upgrade (Alpine)
@@ -70,9 +70,6 @@
         cmd: "dnf module enable php:remi-8.0 -y"
       when: remi.changed
 
-    - name: install ripgrep repository
-      command: "sudo dnf config-manager --add-repo https://copr.fedorainfracloud.org/coprs/carlwgeorge/ripgrep/repo/epel-7/carlwgeorge-ripgrep-epel-7.repo"
-
   when: ansible_distribution in ["Rocky"]
 
 - name: upgrade (Rocky, Fedora)
@@ -85,7 +82,20 @@
   tags: install
   package:
     name: [htop,ripgrep,tar,neofetch,tree,zsh,ranger,unzip,git,speedtest-cli,wget,curl,tmux,rsync,"{{ locate }}","{{ numlockx }}"]
-    state: install
+    state: latest
+
+- name: install fzf package
+  tags: install
+  package:
+    name: fzf
+    state: present
+  when: ansible_distribution != "Rocky"
+
+- name: Install fzf package
+  tags: install
+  command: 
+    cmd: dnf install https://kojipkgs.fedoraproject.org//packages/fzf/0.35.1/2.fc38/x86_64/fzf-0.35.1-2.fc38.x86_64.rpm -y
+  when: ansible_distribution == "Rocky"
 
 - name: install more basic packages for Alpine
   tags: install
