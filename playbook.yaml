@@ -1,9 +1,8 @@
 ---
-
 - hosts: all
   become: true
   roles:
-   - basic_pkgs
+    - basic_pkgs
 
 - hosts: all
   become: true
@@ -14,6 +13,13 @@
   become: true
   roles:
     - zsh
+
+- hosts: all
+  become: true
+  roles:
+    - node_exporter
+  vars:
+    version: 1.5.0
 
 - hosts: file_servers
   become: true
