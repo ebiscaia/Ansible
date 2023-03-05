@@ -1,0 +1,105 @@
+# vim:ft=yaml.ansible
+#
+- name: remove file
+  tags: node_exporter
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/bin/node_exporter
+  when: ansible_distribution == "Alpine"
+
+- name: Set arch variable for arm64 architecture
+  tags: node_exporter
+  set_fact:
+    arch: 'arm64'
+  when: ansible_architecture == 'aarch64'
+
+- name: Set arch variable for x86_64 architecture
+  tags: node_exporter
+  set_fact:
+    arch: 'amd64'
+  when: ansible_architecture == 'x86_64'
+
+- name: check if node_exporter exists
+  tags: node_exporter
+  stat:
+    path: /usr/bin/node_exporter
+  register: node_exporter
+
+- name: check node_exporter version
+  tags: node_exporter
+  shell: "node_exporter --version | awk 'NR == 1 && /[0-9].*\\.[0-9].*\\.[0-9]*/ {print $3}'"
+  register: node_exporter_version
+  when: node_exporter.stat.exists
+
+- name: install node_exporter
+  tags: node_exporter
+  block:
+    - name: untar node_exporter from remote source (download)
+      ansible.builtin.unarchive:
+        src: 'https://github.com/prometheus/node_exporter/releases/download/v{{ version }}/node_exporter-{{ version }}.linux-{{ arch }}.tar.gz'
+        dest: /root/
+        remote_src: true
+
+    - name: move node_exporter executable to /usr/bin
+      ansible.builtin.copy:
+        src: '/root/node_exporter-{{ version }}.linux-{{ arch }}/node_exporter'
+        dest: /usr/bin/
+        owner: root
+        group: root
+        mode: '0755'
+        remote_src: true
+
+    - name: remove the rest of the contents downloaded in the tarball file
+      ansible.builtin.file:
+        path: '/root/node_exporter-{{ version }}.linux-{{ arch }}'
+        state: absent
+
+  when:
+    - not node_exporter.stat.exists
+    - node_exporter_version != version
+  notify: Restart node_exporter
+
+- name: create service file systemd
+  tags: node_exporter
+  copy:
+    content: |
+      Description=node_exporter
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/bin/node_exporter
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/node_exporter.service
+  notify: Restart node_exporter
+  when: ansible_service_mgr == 'systemd'
+
+- name: Create OpenRC service file
+  tags: node_exporter
+  copy:
+    content: |
+      #!/sbin/openrc-run
+
+      command="/usr/bin/node_exporter"
+      command_args=""
+      command_background="yes"
+
+      pidfile="/var/run/node_exporter.pid"
+      depend() {
+          need net
+      }
+
+      start_pre() {
+          checkpath --directory --mode 0755 --owner root:root /var/run/node_exporter
+      }
+    dest: /etc/init.d/node_exporter
+    mode: '0755'
+  notify: Restart node_exporter
+  when: ansible_service_mgr == 'openrc'
+
+
